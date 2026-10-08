@@ -128,9 +128,9 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
   }, '⎋ Esc');
   const changesBtn = h('button.btn', { type: 'button', title: t('What this worker changed: files, diff, commit, open a PR (C at the desk)') }, `🌿 ${t('Changes')}`);
   const closeBtn = h('button.btn.close', { title: `${t('Leave terminal')} (Esc)`, 'aria-label': t('Close') }, '✕');
-  const host = h('div.term-host', { 'data-drop': '📎 Drop screenshots or files here to put them in the terminal' });
+  const host = h('div.term-host', { dir: 'ltr', 'data-drop': '📎 Drop screenshots or files here to put them in the terminal' });
   const keys = h('div.term-keys', { role: 'group', 'aria-label': 'Keys' });
-  const say = h('input', { type: 'text', placeholder: t('Reply, or tell it what to do next…'), 'aria-label': t('Prompt'), enterkeyhint: 'send', autocomplete: 'off' }) as HTMLInputElement;
+  const say = h('input', { type: 'text', dir: 'auto', placeholder: t('Reply, or tell it what to do next…'), 'aria-label': t('Prompt'), enterkeyhint: 'send', autocomplete: 'off' }) as HTMLInputElement;
   const sayBtn = h('button.btn.primary', { type: 'submit' }, t('Send'));
   const sayForm = h('form.term-say', {}, dictateField(say), sayBtn);
   const keypad = opts.keypad ? h('div.term-keypad', {}, keys, sayForm) : null;
