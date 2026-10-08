@@ -488,5 +488,17 @@ export const FA_TRANSLATIONS: Record<string, string> = {
   // Search
   'Search the chat and every terminal…': 'جستجو در چت و تمامی ترمینال‌ها…',
   'Search the chat and every terminal': 'جستجو در چت و تمامی ترمینال‌ها',
+
+  // Splash and loading screen
+  'Unpacking the office': 'در حال آماده‌سازی و استخراج منابع…',
+  'Knocking on the door': 'در حال ورود به دفتر…',
+  'Fetching the dog': 'در حال آوردن سگ نگهبان…',
+  'Opening the doors': 'در حال گشودن درها…',
+  'Loading': 'بارگذاری',
+  '📱 On a phone? The 2D view is made for it: every worker and how it’s doing, its terminal, and the boards.': '📱 از گوشی استفاده می‌کنید؟ نمای ۲ بعدی مخصوص موبایل طراحی شده است: مشاهده تمام کارمندان، وضعیت آن‌ها، ترمینال‌ها و بردهای وظایف.',
+  '🐢 The 3D office is running slowly on this computer. The 2D view has the workers, their terminals and the boards, without the 3D.': '🐢 محیط ۳ بعدی روی این سیستم با سرعت پایینی اجرا می‌شود. نمای ۲ بعدی تمامی امکانات کارمندان، ترمینال‌ها و بردها را بدون بار گرافیکی ۳ بعدی در اختیارتان می‌گذارد.',
+  'Stay in 3D': 'ماندن در نمای ۳ بعدی',
+  'Try the 2D view': 'امتحان نمای ۲ بعدی',
+  'Open the 2D view': 'باز کردن نمای ۲ بعدی',
 };
 
