@@ -4,6 +4,7 @@ import { SEARCH_MAX, SEARCH_MIN, searchKey } from '../../shared/search';
 import { store } from '../state';
 import { h, openModal, timeAgo } from './dom';
 import type { TerminalFind } from './terminal';
+import { t } from './i18n';
 
 // The 🔎 window: words in the office chat and in every worker's terminal, including what was said
 // and shown before the office last restarted. A terminal line opens that terminal right at it.
@@ -38,20 +39,20 @@ function highlight(text: string, needle: string): (string | HTMLElement)[] {
 export function openSearch(openTerminal: (workerId: string, find: TerminalFind) => void) {
   const input = h('input', {
     type: 'text',
-    placeholder: 'Search the chat and every terminal…',
+    placeholder: t('Search the chat and every terminal…'),
     maxlength: SEARCH_MAX,
     autocomplete: 'off',
     spellcheck: 'false',
-    'aria-label': 'Search the chat and every terminal',
+    'aria-label': t('Search the chat and every terminal'),
   });
   input.value = lastQuery;
   const status = h('p.note.search-status');
   const results = h('div.search-results');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
   const el = h(
     'div.modal.search',
-    { role: 'dialog', 'aria-label': 'Search' },
-    h('header', {}, h('h2', {}, '🔎 Search'), close),
+    { role: 'dialog', 'aria-label': t('Search') },
+    h('header', {}, h('h2', {}, `🔎 ${t('Search')}`), close),
     h('div.body', {}, input, status, results),
   );
 

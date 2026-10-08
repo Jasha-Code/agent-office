@@ -3,6 +3,7 @@ import type { ServiceInfo, ServicesState } from '../../shared/protocol';
 import { store } from '../state';
 import { h, openModal, timeAgo } from './dom';
 import { copy, copyButton, guessOs, openCommand, OS_LABEL, type Os } from './team';
+import { t } from './i18n';
 
 /** Whether this page came over the office's Tailscale network, where every server has its own link. */
 function onTailnet(s: ServicesState): boolean {
@@ -48,13 +49,13 @@ export function openServices() {
   let picked: number | null = null;
   let copied: number | null = null;
   const body = h('div.body.team.services');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
   const tabs = h('div.os-tabs');
-  const footer = h('footer', {}, h('span.grow', {}, 'Tunnels go through the office, so the office password still guards every page. Keep the terminal open while you look.'));
+  const footer = h('footer', {}, h('span.grow', {}, t('Tunnels go through the office, so the office password still guards every page. Keep the terminal open while you look.')));
   const el = h(
     'div.modal',
-    { role: 'dialog', 'aria-label': 'Services', style: 'width:min(760px,100%)' },
-    h('header', {}, h('h2', {}, '🌐 Services'), tabs, close),
+    { role: 'dialog', 'aria-label': t('Services'), style: 'width:min(760px,100%)' },
+    h('header', {}, h('h2', {}, `🌐 ${t('Services')}`), tabs, close),
     body,
     footer,
   );

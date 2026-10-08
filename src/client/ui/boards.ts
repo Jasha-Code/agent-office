@@ -9,6 +9,7 @@ import { inProgress } from './github/progress';
 import type { BoardActions } from './github/prompts';
 import { openPull } from './github/pull-window';
 import { providerLabel } from './provider';
+import { t } from './i18n';
 
 const TILTS = ['-1.2deg', '0.8deg', '-0.4deg', '1.4deg', '0deg', '-0.9deg'];
 const NOTE_COLORS = ['#fff7b0', '#ffd6e0', '#caffbf', '#bde0fe', '#ffe5b4'];
@@ -29,20 +30,20 @@ function issueColumns(items: GhIssue[]): Column<GhIssue>[] {
   const started = open.filter((i) => inProgress(i, store.taskForIssue(i.number)));
   const todo = open.filter((i) => !started.includes(i));
   return [
-    { key: 'open', title: '📥 Open', items: todo },
-    { key: 'progress', title: '🚧 In progress', items: started },
-    { key: 'closed', title: '✅ Closed', items: items.filter((i) => i.state !== 'OPEN').sort(byUpdated), max: 40 },
+    { key: 'open', title: `📥 ${t('Open')}`, items: todo },
+    { key: 'progress', title: `🚧 ${t('In progress')}`, items: started },
+    { key: 'closed', title: `✅ ${t('Closed')}`, items: items.filter((i) => i.state !== 'OPEN').sort(byUpdated), max: 40 },
   ];
 }
 
 function pullColumns(items: GhPull[]): Column<GhPull>[] {
   const open = items.filter((p) => p.state === 'OPEN');
   return [
-    { key: 'draft', title: '✏️ Draft', items: open.filter((p) => p.isDraft) },
-    { key: 'review', title: '👀 In review', items: open.filter((p) => !p.isDraft && p.reviewDecision !== 'APPROVED') },
-    { key: 'approved', title: '👍 Approved', items: open.filter((p) => !p.isDraft && p.reviewDecision === 'APPROVED') },
-    { key: 'merged', title: '🎉 Merged', items: items.filter((p) => p.state === 'MERGED').sort(byUpdated), max: 30 },
-    { key: 'closed', title: '🗑️ Closed', items: items.filter((p) => p.state === 'CLOSED').sort(byUpdated), max: 20 },
+    { key: 'draft', title: `✏️ ${t('Draft')}`, items: open.filter((p) => p.isDraft) },
+    { key: 'review', title: `👀 ${t('In review')}`, items: open.filter((p) => !p.isDraft && p.reviewDecision !== 'APPROVED') },
+    { key: 'approved', title: `👍 ${t('Approved')}`, items: open.filter((p) => !p.isDraft && p.reviewDecision === 'APPROVED') },
+    { key: 'merged', title: `🎉 ${t('Merged')}`, items: items.filter((p) => p.state === 'MERGED').sort(byUpdated), max: 30 },
+    { key: 'closed', title: `🗑️ ${t('Closed')}`, items: items.filter((p) => p.state === 'CLOSED').sort(byUpdated), max: 20 },
   ];
 }
 
@@ -130,9 +131,9 @@ function card(n: number, title: string, meta: (Node | string)[], i: number, oncl
 export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActions) {
   const body = h('div.body');
   const status = h('span.board-status');
-  const refresh = h('button.btn', { title: 'Refresh from GitHub', onclick: () => net.send({ t: 'gh.refresh' }) }, '🔄 Refresh');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
-  const el = h('div.modal.board', { role: 'dialog', 'aria-label': kind === 'issues' ? 'Issues board' : 'Pull requests board' }, h('header', {}, h('h2', {}, kind === 'issues' ? '📌 Issues' : '🔀 Pull Requests'), status, refresh, close), body);
+  const refresh = h('button.btn', { title: t('Refresh from GitHub'), onclick: () => net.send({ t: 'gh.refresh' }) }, `🔄 ${t('Refresh')}`);
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
+  const el = h('div.modal.board', { role: 'dialog', 'aria-label': kind === 'issues' ? t('Issues board') : t('Pull requests board') }, h('header', {}, h('h2', {}, kind === 'issues' ? `📌 ${t('Issues')}` : `🔀 ${t('Pull Requests')}`), status, refresh, close), body);
 
   const filters = loadFilters(kind);
   /** What each column's filter box holds (column key → text), for as long as the board is open. */
