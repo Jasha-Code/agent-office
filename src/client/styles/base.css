@@ -176,3 +176,24 @@ a.when:hover { text-decoration: underline; }
   flex-direction: row-reverse;
 }
 
+input[type="checkbox"], input[type="radio"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  vertical-align: middle;
+}
+[dir="rtl"] input[type="checkbox"],
+[dir="rtl"] input[type="radio"] {
+  margin-left: 8px;
+  margin-right: 0;
+}
+[dir="rtl"] label:has(> input[type="checkbox"]),
+[dir="rtl"] label:has(> input[type="radio"]),
+[dir="rtl"] .check,
+[dir="rtl"] .repo-pick,
+[dir="rtl"] .gh-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: right;
+}
+

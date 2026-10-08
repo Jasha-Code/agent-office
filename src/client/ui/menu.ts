@@ -222,9 +222,18 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
     menu.backdrop.classList.add('menu-backdrop');
     menuBtn.setAttribute('aria-expanded', 'true');
     // Hangs under the ☰ button.
+    const isRtl = document.documentElement.dir === 'rtl';
     const r = menuBtn.getBoundingClientRect();
     el.style.top = `${r.bottom + 8}px`;
-    el.style.right = `${Math.max(8, window.innerWidth - r.right)}px`;
+    if (isRtl) {
+      el.style.left = `${Math.max(8, r.left)}px`;
+      el.style.right = 'auto';
+      el.style.transformOrigin = 'top left';
+    } else {
+      el.style.right = `${Math.max(8, window.innerWidth - r.right)}px`;
+      el.style.left = 'auto';
+      el.style.transformOrigin = 'top right';
+    }
     el.style.maxHeight = `${window.innerHeight - r.bottom - 20}px`;
     el.querySelector<HTMLElement>('.menu-item')?.focus();
   }

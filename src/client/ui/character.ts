@@ -144,10 +144,12 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
   let style: FormalStyle = (localStorage.getItem('ao_style') as FormalStyle) || 'suit';
 
   const defaultRole = FORMAL_ROLES.find((r) => r.id === role) ?? FORMAL_ROLES[0];
+  const isDefaultGuest = store.profile.name === 'Guest';
   const pick: Profile = {
     ...store.profile,
-    color: store.profile.color || defaultRole.defaultColor,
-    look: { ...store.profile.look },
+    name: isDefaultGuest ? (currentLang() === 'fa' ? 'مدیر ارشد' : 'Guest') : store.profile.name,
+    color: isDefaultGuest ? defaultRole.defaultColor : (store.profile.color || defaultRole.defaultColor),
+    look: isDefaultGuest ? { skin: 2, hair: 0, style: 0 } : { ...store.profile.look },
   };
 
   const canvas = h('canvas', { 'aria-label': t('Your character, drag to spin') }) as HTMLCanvasElement;
@@ -285,7 +287,12 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
       // storage blocked
     }
     const newColor = FORMAL_COLORS[Math.floor(Math.random() * FORMAL_COLORS.length)];
-    change(randomLook(), newColor);
+    const neatLook: Look = {
+      skin: Math.floor(Math.random() * 4),
+      hair: Math.floor(Math.random() * 3),
+      style: [0, 1, 4, 6][Math.floor(Math.random() * 4)],
+    };
+    change(neatLook, newColor);
   });
 
   const save = h('button.btn.primary', { type: 'submit' }, first ? t('Enter the office 🚪') : t('Save'));

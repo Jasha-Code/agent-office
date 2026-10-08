@@ -136,21 +136,26 @@ export function openElevator(opts: ElevatorOptions): void {
     const here = mine && !opts.downstairs();
     const p = floorPalette(f.palette);
     const stats: (HTMLElement | string)[] = [];
-    if (f.cloning) stats.push(h('span', { title: f.clone?.detail ?? 'Being cloned' }, cloneLabel(f.clone)));
+    if (f.cloning) stats.push(h('span', { title: f.clone?.detail ?? t('Being cloned') }, cloneLabel(f.clone)));
     else {
-      if (f.busy) stats.push(h('span', { title: 'Working' }, `👷 ${f.busy}`));
-      if (f.waiting) stats.push(h('span.waiting', { title: 'Waiting on someone' }, `🙋 ${f.waiting}`));
-      stats.push(h('span', { title: 'Workers at desks' }, `💻 ${f.workers}`));
-      if (f.people) stats.push(h('span', { title: 'People on this floor' }, `🧑 ${f.people}`));
+      if (f.busy) stats.push(h('span', { title: t('Working') }, `👷 ${f.busy}`));
+      if (f.waiting) stats.push(h('span.waiting', { title: t('Waiting on someone') }, `🙋 ${f.waiting}`));
+      stats.push(h('span', { title: t('Workers at desks') }, `💻 ${f.workers}`));
+      if (f.people) stats.push(h('span', { title: t('People on this floor') }, `🧑 ${f.people}`));
     }
     const btn = h(
       'button.floor-btn',
-      { type: 'button', class: here ? 'here' : '', disabled: f.cloning || here, title: here ? "You're on this floor" : f.cloning ? 'Still being cloned' : `Ride ${mine ? 'back up ' : ''}to ${f.name}` },
+      {
+        type: 'button',
+        class: here ? 'here' : '',
+        disabled: f.cloning || here,
+        title: here ? t("You're on this floor") : f.cloning ? t('Still being cloned') : mine ? `${t('Ride back up to')} ${f.name}` : `${t('Ride to')} ${f.name}`,
+      },
       h('span.floor-no', { style: `background:${p.trim}` }, String(i + 1)),
       h(
         'span.floor-text',
         {},
-        h('span.floor-name', {}, f.name, here ? h('span.here-tag', {}, 'you are here') : mine ? h('span.here-tag', {}, 'your floor') : null),
+        h('span.floor-name', {}, f.name, here ? h('span.here-tag', {}, t('you are here')) : mine ? h('span.here-tag', {}, t('your floor')) : null),
         h('span.floor-sub', {}, [f.repo ?? f.dir, f.cloning ? f.clone?.detail : ''].filter(Boolean).join(' · ')),
         f.cloning ? cloneBar(f.clone) : null,
       ),
@@ -169,23 +174,23 @@ export function openElevator(opts: ElevatorOptions): void {
     const btn = floorButton(f, i);
     if (f.cloning) {
       if (!store.me.admin && !(adding && sameRepo(f.repo, adding))) return btn;
-      const stop = h('button.btn.floor-off', { type: 'button', title: `Stop cloning ${f.repo ?? f.name}`, 'aria-label': `Stop cloning ${f.name}` }, '⏹️');
-      stop.addEventListener('click', () => confirmDialog(`Stop cloning ${f.repo ?? f.name}?`, "What's come down so far is thrown away. You can add it again any time.", '⏹️ Stop cloning', () => net.send({ t: 'floor.cancel', floor: f.id })));
+      const stop = h('button.btn.floor-off', { type: 'button', title: `${t('Stop cloning')} ${f.repo ?? f.name}`, 'aria-label': `${t('Stop cloning')} ${f.name}` }, '⏹️');
+      stop.addEventListener('click', () => confirmDialog(`${t('Stop cloning')} ${f.repo ?? f.name}؟`, t("What's come down so far is thrown away. You can add it again any time."), `⏹️ ${t('Stop cloning')}`, () => net.send({ t: 'floor.cancel', floor: f.id })));
       return h('div.floor-row', {}, btn, stop);
     }
     if (!store.me.admin) return btn;
-    const off = h('button.btn.floor-off', { type: 'button', title: `Take ${f.name} off the building`, 'aria-label': `Remove ${f.name}` }, '🗑');
+    const off = h('button.btn.floor-off', { type: 'button', title: `${t('Take off the building')} ${f.name}`, 'aria-label': `${t('Remove floor')} ${f.name}` }, '🗑');
     off.addEventListener('click', () => confirmRemove(f));
     return h('div.floor-row', {}, btn, off);
   };
 
   const confirmRemove = (f: FloorInfo) => {
     const next = store.floors.find((o) => o.id !== f.id && !o.cloning);
-    const workers = f.workers ? `Its ${f.workers} worker${f.workers === 1 ? '' : 's'} stop${f.workers === 1 ? 's' : ''}. ` : '';
-    const people = f.people ? `Everyone on it rides the elevator to ${next ? next.name : 'the lobby'}. ` : '';
+    const workers = f.workers ? `${t('Its')} ${f.workers} ${f.workers === 1 ? t('worker stops') : t('workers stop')}. ` : '';
+    const people = f.people ? `${t('Everyone on it rides the elevator to')} ${next ? next.name : t('the lobby')}. ` : '';
     // The office was started in it: its accounts, password and chat live in that .agent-office too, and stay.
-    const own = f.local ? ' The office keeps its own settings there too, so it carries on as before, just without this floor.' : '';
-    confirmDialog(`Take ${f.name} off the building?`, `${workers}${people}Nothing is deleted: its checkout stays in ${f.dir}, .agent-office folder and all.${own}`, '🗑 Remove floor', () => net.send({ t: 'floor.remove', floor: f.id }));
+    const own = f.local ? ` ${t('The office keeps its own settings there too, so it carries on as before, just without this floor.')}` : '';
+    confirmDialog(`${t('Take')} ${f.name} ${t('off the building')}؟`, `${workers}${people}${t('Nothing is deleted: its checkout stays in')} ${f.dir}${t(', .agent-office folder and all.')}${own}`, `🗑 ${t('Remove floor')}`, () => net.send({ t: 'floor.remove', floor: f.id }));
   };
 
   /** The roof, over every floor: the rooftop bar. */

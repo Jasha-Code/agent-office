@@ -7,6 +7,7 @@ import { OfficeSound } from '../sound';
 import { store, type Profile, type Settings } from '../state';
 import { toast } from '../ui/dom';
 import { Person } from '../world/character';
+import { applyFormalAttire, removeFormalAttire, type FormalRole, type FormalStyle } from '../world/character/formal';
 import { Smoke } from '../world/smoke';
 import type { Ctx } from './context';
 import { noOutline } from './outline';
@@ -14,12 +15,22 @@ import { noOutline } from './outline';
 /** A puff of cigarette smoke off someone's cigarette: a wisp off it, or a breath of it out. */
 export type Puff = (kind: 'wisp' | 'exhale', at: THREE.Vector3, dir: THREE.Vector3) => void;
 
+let myFormal: THREE.Object3D[] | null = null;
+
+function syncMyFormal(me: Person, color: string) {
+  if (myFormal) removeFormalAttire(myFormal);
+  const role: FormalRole = (localStorage.getItem('ao_role') as FormalRole) || 'manager';
+  const style: FormalStyle = (localStorage.getItem('ao_style') as FormalStyle) || 'suit';
+  myFormal = applyFormalAttire(me.rig, style, role, color);
+}
+
 /** Your own character, as everyone else sees it (no name tag over your own head). */
 export function makeMe(ctx: Ctx): Person {
   const me = new Person(store.profile.name, store.profile.color, store.profile.look);
   me.showLabel(false);
   ctx.scene.add(me.root);
   noOutline(me.root);
+  syncMyFormal(me, store.profile.color);
   return me;
 }
 
@@ -67,6 +78,7 @@ export function installYou(ctx: Ctx) {
     const { me, hands } = ctx;
     me.setColor(p.color);
     me.setLook(p.look);
+    syncMyFormal(me, p.color);
     hands.setColor(p.color);
     hands.setSkin(me.skinColor);
   }
