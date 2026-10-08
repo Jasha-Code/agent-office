@@ -6,6 +6,7 @@ import { AVATAR_COLORS, saveProfile, store, type Profile } from '../state';
 import { Person } from '../world/character';
 import { toonUnique } from '../world/toon';
 import { h, openModal } from './dom';
+import { t } from './i18n';
 
 /** A turntable with your character on it, drawn with its own small renderer. */
 class Preview {
@@ -177,7 +178,7 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
     skinRow.replaceChildren(...SKIN_TONES.map((c, i) => swatch(c, `Skin tone ${i + 1} of ${SKIN_TONES.length}`, i === skin, () => change({ skin: i }))));
     styleRow.replaceChildren(
       ...HAIR_STYLES.map((name, i) =>
-        h('button.btn', { type: 'button', role: 'radio', 'aria-checked': String(i === style), class: i === style ? 'on' : '', onclick: () => change({ style: i }) }, name),
+        h('button.btn', { type: 'button', role: 'radio', 'aria-checked': String(i === style), class: i === style ? 'on' : '', onclick: () => change({ style: i }) }, t(name)),
       ),
     );
     hairRow.replaceChildren(...HAIR_COLORS.map((c, i) => swatch(c, HAIR_COLOR_NAMES[i], i === hair, () => change({ hair: i }))));
@@ -185,32 +186,32 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
   };
   paint();
 
-  const surprise = h('button.btn', { type: 'button', title: 'Random look' }, '🎲 Surprise me');
+  const surprise = h('button.btn', { type: 'button', title: t('Random look') }, t('🎲 Surprise me'));
   surprise.addEventListener('click', () => change(randomLook(), AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]));
-  const save = h('button.btn.primary', { type: 'submit' }, first ? 'Enter the office 🚪' : 'Save');
-  const close = h('button.btn.close', { type: 'button', 'aria-label': 'Close', title: first ? 'Skip: go in with this look (Esc)' : 'Close (Esc)' }, '✕');
+  const save = h('button.btn.primary', { type: 'submit' }, first ? t('Enter the office 🚪') : t('Save'));
+  const close = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: first ? `${t('Close')} (Esc)` : `${t('Close')} (Esc)` }, '✕');
 
   const form = h(
     'form.modal.charsel',
-    { role: 'dialog', 'aria-label': 'Pick your character' },
-    h('header', {}, h('h2', {}, first ? '👋 Pick your character' : '🧍 Your character'), close),
+    { role: 'dialog', 'aria-label': t('Pick your character') },
+    h('header', {}, h('h2', {}, first ? `👋 ${t('Pick your character')}` : `🧍 ${t('Your character')}`), close),
     h(
       'div.body',
       {},
-      h('div.charsel-stage', {}, canvas, h('span.tip', {}, 'Drag to spin')),
+      h('div.charsel-stage', {}, canvas, h('span.tip', {}, t('Drag to spin'))),
       h(
         'div.charsel-opts',
         {},
-        h('label', {}, 'Your name'),
+        h('label', {}, t('Your name')),
         account ? input : h('div.webhook', {}, input, reroll),
         account ? h('p.setting-note', {}, `🔑 Signed in as ${account.name}, so that's your name here.`) : null,
-        h('label', {}, 'Skin tone'),
+        h('label', {}, t('Skin tone')),
         skinRow,
-        h('label', {}, 'Hair'),
+        h('label', {}, t('Hair')),
         styleRow,
-        h('label', {}, 'Hair color'),
+        h('label', {}, t('Hair color')),
         hairRow,
-        h('label', {}, 'Shirt'),
+        h('label', {}, t('Shirt')),
         shirtRow,
       ),
     ),

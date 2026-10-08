@@ -4,21 +4,22 @@
  */
 import type { DeskKey } from '../interaction';
 import { h } from '../ui/dom';
+import { t } from '../ui/i18n';
 import type { Interactable } from '../world/types';
 import type { Hint } from './context';
 
 export function key(k: string, label: string) {
-  return h('span', {}, h('span.key', {}, k), label);
+  return h('span', {}, h('span.key', {}, k), t(label));
 }
 
 /** Secondary text in the hint bar. */
 export function aside(text: string) {
-  return h('span', { style: 'opacity:.75;font-weight:600' }, text);
+  return h('span', { style: 'opacity:.75;font-weight:600' }, t(text));
 }
 
 /** What the hint bar calls the thing you're facing. */
 export function hintTitle(text: string) {
-  return h('span.title', {}, text);
+  return h('span.title', {}, t(text));
 }
 
 /** A board you open with E. */

@@ -3,6 +3,7 @@ import { store, type HudPanel, type Settings, type Topic } from '../state';
 import { waitingOnSomeone } from '../notify';
 import { DESK_BY_ID } from '../../shared/layout';
 import { $, h, openModal, type Modal } from './dom';
+import { t } from './i18n';
 
 /** One thing the ☰ menu does. Any of them can be pinned to the top bar. */
 export interface HudAction {
@@ -62,7 +63,7 @@ export interface Hud {
  */
 export function mountHud(actions: HudAction[], settings: Settings, save: () => void): Hud {
   const dock = $('dock');
-  const labelOf = (a: HudAction) => (typeof a.label === 'string' ? a.label : a.label());
+  const labelOf = (a: HudAction) => t(typeof a.label === 'string' ? a.label : a.label());
   const iconOf = (a: HudAction) => (typeof a.icon === 'string' ? a.icon : a.icon());
   const keyOf = (a: HudAction) => (typeof a.key === 'function' ? a.key() : a.key);
   const classOf = (a: HudAction, blocked?: string) => [a.on?.() && 'on', a.tone?.(), blocked && 'dim'].filter(Boolean).join(' ');
@@ -70,7 +71,7 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
   const pinned = (a: HudAction) => settings.pins.includes(a.id);
   let menu: Modal | null = null;
 
-  const menuBtn = h('button.btn.dock-btn.dock-menu', { type: 'button', 'aria-label': 'Menu', 'aria-haspopup': 'menu', 'aria-expanded': 'false', title: 'Menu: everything else, and what shows on screen (Tab)' }, h('span.burger', { 'aria-hidden': 'true' }, h('i'), h('i'), h('i')));
+  const menuBtn = h('button.btn.dock-btn.dock-menu', { type: 'button', 'aria-label': t('Menu'), 'aria-haspopup': 'menu', 'aria-expanded': 'false', title: `${t('Menu')}: (Tab)` }, h('span.burger', { 'aria-hidden': 'true' }, h('i'), h('i'), h('i')));
   menuBtn.addEventListener('click', () => toggleMenu());
 
   function applyPanels() {
@@ -94,7 +95,8 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
 
   /** An action up on the top bar. */
   function dockButton(a: HudAction): HTMLElement {
-    const chip = pinned(a) ? '' : a.chip?.();
+    const rawChip = pinned(a) ? '' : a.chip?.();
+    const chip = rawChip ? t(rawChip) : '';
     const blocked = a.blocked?.();
     return h(
       'button.btn.dock-btn',
@@ -185,7 +187,7 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
         'button.menu-item.menu-toggle',
         { type: 'button', role: 'menuitemcheckbox' },
         h('span.mi-icon', {}, p.icon),
-        h('span.mi-label', {}, p.label, h('small', {}, p.what)),
+        h('span.mi-label', {}, t(p.label), h('small', {}, t(p.what))),
         h('span.switch', { 'aria-hidden': 'true' }),
       );
       const paint = () => item.setAttribute('aria-checked', String(settings.hud[p.id]));
@@ -196,14 +198,14 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
       });
       return item;
     };
-    const section = (name: string, rows: HTMLElement[]) => (rows.length ? [h('div.menu-sec', {}, name), ...rows] : []);
+    const section = (name: string, rows: HTMLElement[]) => (rows.length ? [h('div.menu-sec', {}, t(name)), ...rows] : []);
     const rows = (s: HudAction['section']) => actions.filter((a) => a.section === s && offered(a)).map(row);
     const el = h(
       'div.hud-menu',
-      { role: 'menu', 'aria-label': 'Menu' },
-      h('div.menu-col', {}, ...section('Open', rows('Open')), ...section('Together', rows('Together'))),
-      h('div.menu-col', {}, ...section('Show on screen', PANELS.map(toggle)), ...section('Office', rows('Office'))),
-      h('p.menu-foot', {}, 'Pin what you use most to keep it on the top bar. ', h('kbd', {}, 'Tab'), ' opens and closes this menu.'),
+      { role: 'menu', 'aria-label': t('Menu') },
+      h('div.menu-col', {}, ...section('section_open', rows('Open')), ...section('section_together', rows('Together'))),
+      h('div.menu-col', {}, ...section('Show on screen', PANELS.map(toggle)), ...section('section_office', rows('Office'))),
+      h('p.menu-foot', {}, t('Pin what you use most to keep it on the top bar. '), h('kbd', {}, 'Tab'), t(' opens and closes this menu.')),
     );
     // On the window, so the keys work wherever focus is while the menu is up.
     const onKey = (e: KeyboardEvent) => menuKey(el, e);

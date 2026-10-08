@@ -62,3 +62,8 @@ agent-office tunnel [office@address | url] [--port <n>] [--office-port <n>] [--n
   the worker stops it. Given an SSH address it opens the tunnel to the office too.
   See docs/tunnel.md.
 ```
+
+## Language & Localization (زبان و بومی‌سازی)
+
+The office supports both Persian (فارسی) with right-to-left (RTL) layout and English. You can switch between languages at any time from **⚙️ Settings → You → Language / زبان**. Your preference is remembered per-browser in `localStorage`.
+

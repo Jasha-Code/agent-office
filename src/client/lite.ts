@@ -13,6 +13,7 @@ import { DESK_BY_ID, nextFreeSeat } from '../shared/layout';
 import { isAsleep } from '../shared/status';
 import type { AgentEffort, AgentProvider, FloorInfo, WorkerInfo } from '../shared/protocol';
 import { $, clip, closeAllModals, doingNow, h, onDoingChange, onModalChange, openModal, readingNow, STATUS_LABEL, timeAgo, toast } from './ui/dom';
+import { t } from './ui/i18n';
 import { openTerminal, openTerminalFor, routeTerminalMessage } from './ui/terminal';
 import { openChanges, openChangesFor, routeChangesMessage } from './ui/changes';
 import { lostWorktreeDialog, openPrompt, routeWorktreeMessage, sendHomeDialog } from './ui/prompt';
@@ -99,13 +100,13 @@ const floorLabel = (f: FloorInfo) => `${f.name}${f.cloning ? ` (${cloneLabel(f.c
 
 function renderFloors() {
   const options = store.floors.map((f) => h('option', { value: f.id, disabled: !!f.cloning }, floorLabel(f)));
-  if (!store.floors.length) options.push(h('option', { value: '' }, 'No floors yet'));
+  if (!store.floors.length) options.push(h('option', { value: '' }, t('No floors yet')));
   floorSelect.replaceChildren(...options);
   floorSelect.value = store.floor ?? '';
   floorSelect.disabled = store.floors.length < 2;
   const p = store.project;
   const f = store.currentFloor();
-  $('floor-meta').textContent = p ? [p.branch && `⎇ ${p.branch}`, f?.repo ?? p.dir, f && `👥 ${f.people} here`].filter(Boolean).join(' · ') : store.floors.length ? '' : 'Add a project from the elevator in the 3D office.';
+  $('floor-meta').textContent = p ? [p.branch && `⎇ ${p.branch}`, f?.repo ?? p.dir, f && `👥 ${f.people} here`].filter(Boolean).join(' · ') : store.floors.length ? '' : t('Add a project from the elevator in the 3D office');
   // Someone waiting on another floor: a way straight there.
   const elsewhere = store.floors.filter((o) => o.id !== store.floor && o.waiting > 0 && !o.cloning);
   const box = $('elsewhere');
@@ -132,7 +133,7 @@ function renderWorkers() {
   const list = byUrgency(store.workers.values());
   const ul = $('workers');
   ul.replaceChildren(...list.map(workerCard));
-  if (!list.length) ul.append(h('li.lite-empty', {}, store.project ? 'Nobody is working on this floor. ✨ New task hires someone.' : 'No workers here.'));
+  if (!list.length) ul.append(h('li.lite-empty', {}, store.project ? t('Nobody is working on this floor. ✨ New task hires someone.') : t('No workers here')));
   $('waiting-now').textContent = waitingLabel(waitingInOrder(list));
   renderTitle();
 }
@@ -362,13 +363,13 @@ if (notifyPermission() === 'default' && settings.notify) $('to-3d').before(bell)
 // ---- In ----------------------------------------------------------------------------------------
 /** Your name, the first time this browser comes in on the shared password. */
 function askName(done: (name: string) => void) {
-  const input = h('input', { type: 'text', maxlength: 24, placeholder: 'Your name', 'aria-label': 'Your name', autocomplete: 'nickname' }) as HTMLInputElement;
+  const input = h('input', { type: 'text', maxlength: 24, placeholder: t('Your name'), 'aria-label': t('Your name'), autocomplete: 'nickname' }) as HTMLInputElement;
   const form = h(
     'form.modal.lite-name',
     {},
-    h('header', {}, h('h2', {}, '👋 Who is it?')),
-    h('div.body', {}, h('p', {}, 'Your teammates see this name on what you type and send.'), input),
-    h('footer', {}, h('button.btn.primary', { type: 'submit' }, 'Come on in')),
+    h('header', {}, h('h2', {}, t('👋 Who is it?'))),
+    h('div.body', {}, h('p', {}, t('Your teammates see this name on what you type and send.')), input),
+    h('footer', {}, h('button.btn.primary', { type: 'submit' }, t('Come on in'))),
   );
   const modal = openModal(form, { escCloses: false, backdropCloses: false });
   form.addEventListener('submit', (e) => {

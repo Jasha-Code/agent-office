@@ -12,6 +12,8 @@ import { agentFields, choiceLabel, officeChoice } from './provider';
 import { openPromptEditor, rewrittenPrompts } from './prompts';
 import { outsideSetting } from './settings-sky';
 import { choiceRow } from './settings-rows';
+import { languageSetting } from './settings-lang';
+import { t } from './i18n';
 
 const VIEWS: [ViewMode, string, string][] = [
   ['first', '👀 First person', 'See through your own eyes. Click the office to look around with the mouse and click things to use them. Esc frees the mouse.'],
@@ -444,6 +446,7 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
   const character = h('button.btn', { type: 'button' }, account ? '🧍 Change your look' : '🧍 Change your look & name');
   const panes: Record<SettingsPane, Node[]> = {
     you: [
+      languageSetting(),
       setting('Your character', null, character),
       setting('Camera view', 'you', seg, note),
       setting('Signed in', null, h('div.volume', {}, signOut), h('p.setting-note', {}, account ? `As ${account.name}, with your own account (${account.role}).` : 'With the shared office password.')),
@@ -475,14 +478,14 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
   };
 
   // The categories down the side, the one picked on the right.
-  const nav = h('nav.settings-nav', { role: 'tablist', 'aria-orientation': 'vertical', 'aria-label': 'Settings' });
+  const nav = h('nav.settings-nav', { role: 'tablist', 'aria-orientation': 'vertical', 'aria-label': t('Settings') });
   const tabs = new Map<SettingsPane, HTMLButtonElement>();
   const bodies = new Map<SettingsPane, HTMLElement>();
   for (const p of PANES) {
-    const tab = h('button.settings-tab', { type: 'button', role: 'tab', onclick: () => show(p.id) }, h('span.icon', { 'aria-hidden': 'true' }, p.icon), h('span', {}, p.label)) as HTMLButtonElement;
+    const tab = h('button.settings-tab', { type: 'button', role: 'tab', onclick: () => show(p.id) }, h('span.icon', { 'aria-hidden': 'true' }, p.icon), h('span', {}, t(p.label))) as HTMLButtonElement;
     tabs.set(p.id, tab);
     nav.append(tab);
-    bodies.set(p.id, h('section.settings-pane', { role: 'tabpanel', 'aria-label': p.label }, h('div.settings-head', {}, h('h3', {}, `${p.icon} ${p.label}`), h('p', {}, p.blurb)), ...panes[p.id]));
+    bodies.set(p.id, h('section.settings-pane', { role: 'tabpanel', 'aria-label': t(p.label) }, h('div.settings-head', {}, h('h3', {}, `${p.icon} ${t(p.label)}`), h('p', {}, t(`pane_${p.id}_blurb`, p.blurb))), ...panes[p.id]));
   }
   const show = (id: SettingsPane) => {
     lastPane = id;
