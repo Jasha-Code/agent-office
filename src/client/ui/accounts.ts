@@ -5,12 +5,13 @@ import { store } from '../state';
 import { h, openModal, timeAgo } from './dom';
 import { confirmDialog } from './prompt';
 import { copyButton } from './team';
+import { t } from './i18n';
 
 export const inviteLink = (v: AccountInvite) => `${location.origin}/join#${v.token}`;
 
-function expiresIn(t: number): string {
-  const d = Math.round((t - Date.now()) / 86_400_000);
-  return d >= 1 ? `expires in ${d} day${d === 1 ? '' : 's'}` : 'expires today';
+function expiresIn(tVal: number): string {
+  const d = Math.round((tVal - Date.now()) / 86_400_000);
+  return d >= 1 ? `${t('expires in')} ${d} ${t('days')}` : t('expires today');
 }
 
 let onInvited: ((msg: Extract<ServerMsg, { t: 'accounts.invited' }>) => void) | null = null;
@@ -25,19 +26,19 @@ export function openAccounts(net: Net) {
   /** The invite just made, shown big until the next one. */
   let fresh: AccountInvite | null = null;
   const body = h('div.body.team.accounts');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
   const signedInAs = h('span.grow');
   const el = h(
     'div.modal',
-    { role: 'dialog', 'aria-label': 'Accounts', style: 'width:min(680px,100%)' },
-    h('header', {}, h('h2', {}, '🔑 Accounts'), close),
+    { role: 'dialog', 'aria-label': t('Accounts'), style: 'width:min(680px,100%)' },
+    h('header', {}, h('h2', {}, `🔑 ${t('Accounts')}`), close),
     body,
     h('footer', {}, signedInAs),
   );
 
-  const nameInput = h('input', { type: 'text', maxlength: 24, placeholder: 'Their name (optional)', 'aria-label': 'Their name', autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
-  const roleSelect = h('select', { 'aria-label': 'Role' }, h('option', { value: 'member' }, 'Member'), h('option', { value: 'admin' }, 'Admin')) as HTMLSelectElement;
-  const inviteBtn = h('button.btn.primary', { type: 'submit' }, 'Make invite link');
+  const nameInput = h('input', { type: 'text', maxlength: 24, placeholder: t('Their name (optional)'), 'aria-label': t('Their name'), autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
+  const roleSelect = h('select', { 'aria-label': t('Role') }, h('option', { value: 'member' }, t('Member')), h('option', { value: 'admin' }, t('Admin'))) as HTMLSelectElement;
+  const inviteBtn = h('button.btn.primary', { type: 'submit' }, t('Make invite link'));
   const form = h('form.invite-row', {}, nameInput, roleSelect, inviteBtn) as HTMLFormElement;
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -51,17 +52,17 @@ export function openAccounts(net: Net) {
     signedInAs.textContent = me.account ? `You're signed in as ${me.account.name} (${me.account.role}).` : "You're signed in with the shared office password.";
     const typing = document.activeElement === nameInput;
     body.replaceChildren();
-    if (!s) return body.append(h('p.empty', {}, 'Loading…'));
+    if (!s) return body.append(h('p.empty', {}, t('Loading…')));
 
     body.append(
-      h('label', {}, 'Invite someone'),
+      h('label', {}, t('Invite someone')),
       form,
-      h('p.note', {}, 'You get a link that makes one account, with its own name and password. It works once and expires after 7 days. Leave the name empty and they pick their own.'),
+      h('p.note', {}, t('You get a link that makes one account, with its own name and password. It works once and expires after 7 days. Leave the name empty and they pick their own.')),
     );
     if (status) body.append(status);
     if (fresh) {
       const v = fresh;
-      body.append(h('div.cmd', {}, h('pre', {}, inviteLink(v)), copyButton('Copy', () => inviteLink(v))));
+      body.append(h('div.cmd', {}, h('pre', {}, inviteLink(v)), copyButton(t('Copy'), () => inviteLink(v))));
     }
     if (store.invites) body.append(h('p.note', {}, 'On this office they also need a way in first: see 👥 Invite teammates.'));
 

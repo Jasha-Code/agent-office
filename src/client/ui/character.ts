@@ -5,8 +5,9 @@ import { HAIR_COLOR_NAMES, HAIR_COLORS, HAIR_STYLES, SKIN_TONES, randomLook, ran
 import { AVATAR_COLORS, saveProfile, store, type Profile } from '../state';
 import { Person } from '../world/character';
 import { toonUnique } from '../world/toon';
+import { applyFormalAttire, removeFormalAttire, FORMAL_COLORS, FORMAL_ROLES, PERSIAN_FORMAL_NAMES, type FormalRole, type FormalStyle } from '../world/character/formal';
 import { h, openModal } from './dom';
-import { t } from './i18n';
+import { t, currentLang } from './i18n';
 
 /** A turntable with your character on it, drawn with its own small renderer. */
 class Preview {
@@ -21,6 +22,7 @@ class Preview {
   private dragging = false;
   private lastDrag = -Infinity;
   private hopT = -1;
+  private formalParts: THREE.Object3D[] = [];
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -84,6 +86,11 @@ class Preview {
     this.raf = requestAnimationFrame(frame);
   }
 
+  setFormal(style: FormalStyle, role: FormalRole, color: string) {
+    removeFormalAttire(this.formalParts);
+    this.formalParts = applyFormalAttire(this.person.rig, style, role, color);
+  }
+
   /** A little hop and wave, to show a change landed. */
   cheer() {
     this.hopT = 0;
@@ -120,6 +127,7 @@ class Preview {
   dispose() {
     cancelAnimationFrame(this.raf);
     this.resize.disconnect();
+    removeFormalAttire(this.formalParts);
     this.scene.traverse((o) => {
       if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).geometry.dispose();
     });
@@ -129,37 +137,55 @@ class Preview {
 }
 
 /**
- * The character select screen: your name, skin tone, hair and shirt, with a live preview.
- * `first` is the one you see when you join: closing it goes in as whoever's picked so far.
+ * The character select screen: name, personality type, formal attire, skin tone, hair and shirt/suit.
  */
 export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
-  const pick: Profile = { ...store.profile, look: { ...store.profile.look } };
-  const canvas = h('canvas', { 'aria-label': 'Your character, drag to spin' }) as HTMLCanvasElement;
-  const preview = new Preview(canvas, pick);
+  let role: FormalRole = (localStorage.getItem('ao_role') as FormalRole) || 'manager';
+  let style: FormalStyle = (localStorage.getItem('ao_style') as FormalStyle) || 'suit';
 
-  // Leave the name blank (or skip this) and you go by the made-up one in the box; 🎲 deals another.
-  // Guest is what you were before you picked one, so it isn't a name to keep.
-  const input = h('input', { type: 'text', maxlength: 24, value: pick.name === 'Guest' ? '' : pick.name, placeholder: randomName(), 'aria-label': 'Your name' }) as HTMLInputElement;
-  const reroll = h('button.btn', { type: 'button', title: 'Random name', 'aria-label': 'Random name' }, '🎲');
+  const defaultRole = FORMAL_ROLES.find((r) => r.id === role) ?? FORMAL_ROLES[0];
+  const pick: Profile = {
+    ...store.profile,
+    color: store.profile.color || defaultRole.defaultColor,
+    look: { ...store.profile.look },
+  };
+
+  const canvas = h('canvas', { 'aria-label': t('Your character, drag to spin') }) as HTMLCanvasElement;
+  const preview = new Preview(canvas, pick);
+  preview.setFormal(style, role, pick.color);
+
+  const getRandName = () => {
+    if (currentLang() === 'fa') {
+      return PERSIAN_FORMAL_NAMES[Math.floor(Math.random() * PERSIAN_FORMAL_NAMES.length)];
+    }
+    return randomName();
+  };
+
+  const initialPlaceholder = getRandName();
+  const input = h('input', { type: 'text', maxlength: 24, value: pick.name === 'Guest' ? '' : pick.name, placeholder: initialPlaceholder, 'aria-label': t('Your name') }) as HTMLInputElement;
+  const reroll = h('button.btn', { type: 'button', title: t('Random name'), 'aria-label': t('Random name') }, '🎲');
   reroll.addEventListener('click', () => {
-    let name = randomName();
-    while (name === input.value || name === input.placeholder) name = randomName();
+    let name = getRandName();
+    while (name === input.value || name === input.placeholder) name = getRandName();
     input.value = input.placeholder = name;
     input.focus();
   });
   const typedName = () => input.value.trim().slice(0, 24) || input.placeholder;
-  // Your account's name is the one everyone sees; only the look is yours to change here.
+
   const account = store.me.account;
   if (account) {
     input.value = account.name;
     input.readOnly = true;
-    input.title = 'Your account name';
+    input.title = t('Your account name');
   }
 
-  const skinRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Skin tone' });
-  const styleRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Hair style' });
-  const hairRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Hair color' });
-  const shirtRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Shirt color' });
+  const roleRow = h('div.seg', { role: 'radiogroup', 'aria-label': t('Personality & Role') });
+  const roleDesc = h('p.charsel-note', {});
+  const attireRow = h('div.seg', { role: 'radiogroup', 'aria-label': t('Attire style') });
+  const skinRow = h('div.swatches', { role: 'radiogroup', 'aria-label': t('Skin tone') });
+  const styleRow = h('div.seg', { role: 'radiogroup', 'aria-label': t('Hair style') });
+  const hairRow = h('div.swatches', { role: 'radiogroup', 'aria-label': t('Hair color') });
+  const shirtRow = h('div.swatches', { role: 'radiogroup', 'aria-label': t('Suit & Shirt color') });
 
   const swatch = (color: string, label: string, on: boolean, choose: () => void) =>
     h('button.swatch', { type: 'button', role: 'radio', 'aria-checked': String(on), style: `background:${color}`, class: on ? 'sel' : '', 'aria-label': label, title: label, onclick: choose });
@@ -169,27 +195,101 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
     if (color) pick.color = color;
     preview.person.setLook(pick.look);
     preview.person.setColor(pick.color);
+    preview.setFormal(style, role, pick.color);
     preview.cheer();
     paint();
   };
 
+  const setRole = (newRole: FormalRole) => {
+    role = newRole;
+    try {
+      localStorage.setItem('ao_role', role);
+    } catch {
+      // storage blocked
+    }
+    const rInfo = FORMAL_ROLES.find((r) => r.id === role);
+    if (rInfo) {
+      if (style !== 'casual') pick.color = rInfo.defaultColor;
+      if (currentLang() === 'fa' && !account && !input.value) {
+        input.placeholder = getRandName();
+      }
+    }
+    preview.person.setColor(pick.color);
+    preview.setFormal(style, role, pick.color);
+    preview.cheer();
+    paint();
+  };
+
+  const setAttire = (newStyle: FormalStyle) => {
+    style = newStyle;
+    try {
+      localStorage.setItem('ao_style', style);
+    } catch {
+      // storage blocked
+    }
+    preview.setFormal(style, role, pick.color);
+    preview.cheer();
+    paint();
+  };
+
+  const ALL_COLORS = [...new Set([...FORMAL_COLORS, ...AVATAR_COLORS])];
+
   const paint = () => {
-    const { skin, hair, style } = pick.look;
-    skinRow.replaceChildren(...SKIN_TONES.map((c, i) => swatch(c, `Skin tone ${i + 1} of ${SKIN_TONES.length}`, i === skin, () => change({ skin: i }))));
-    styleRow.replaceChildren(
-      ...HAIR_STYLES.map((name, i) =>
-        h('button.btn', { type: 'button', role: 'radio', 'aria-checked': String(i === style), class: i === style ? 'on' : '', onclick: () => change({ style: i }) }, t(name)),
+    const { skin, hair, style: hairStyle } = pick.look;
+    const isFa = currentLang() === 'fa';
+
+    // Role options
+    roleRow.replaceChildren(
+      ...FORMAL_ROLES.map((r) =>
+        h(
+          'button.btn',
+          { type: 'button', role: 'radio', 'aria-checked': String(r.id === role), class: r.id === role ? 'on' : '', onclick: () => setRole(r.id) },
+          `${r.icon} ${isFa ? r.persianLabel : t(r.label)}`,
+        ),
       ),
     );
-    hairRow.replaceChildren(...HAIR_COLORS.map((c, i) => swatch(c, HAIR_COLOR_NAMES[i], i === hair, () => change({ hair: i }))));
-    shirtRow.replaceChildren(...AVATAR_COLORS.map((c) => swatch(c, `Shirt ${c}`, c === pick.color, () => change({}, c))));
+    const activeRole = FORMAL_ROLES.find((r) => r.id === role) ?? FORMAL_ROLES[0];
+    roleDesc.textContent = isFa ? activeRole.persianDesc : activeRole.desc;
+
+    // Attire style options
+    attireRow.replaceChildren(
+      ...([
+        ['suit', '👔 ' + (isFa ? 'کت‌وشلوار رسمی مدیریتی' : t('Executive Suit'))],
+        ['smart', '👔 ' + (isFa ? 'رسمی اداری' : t('Smart Corporate'))],
+        ['casual', '👕 ' + (isFa ? 'اسپرت اداری' : t('Casual'))],
+      ] as const).map(([sKey, sLabel]) =>
+        h('button.btn', { type: 'button', role: 'radio', 'aria-checked': String(sKey === style), class: sKey === style ? 'on' : '', onclick: () => setAttire(sKey) }, sLabel),
+      ),
+    );
+
+    skinRow.replaceChildren(...SKIN_TONES.map((c, i) => swatch(c, `${t('Skin tone')} ${i + 1}`, i === skin, () => change({ skin: i }))));
+    styleRow.replaceChildren(
+      ...HAIR_STYLES.map((name, i) =>
+        h('button.btn', { type: 'button', role: 'radio', 'aria-checked': String(i === hairStyle), class: i === hairStyle ? 'on' : '', onclick: () => change({ style: i }) }, t(name)),
+      ),
+    );
+    hairRow.replaceChildren(...HAIR_COLORS.map((c, i) => swatch(c, t(HAIR_COLOR_NAMES[i]), i === hair, () => change({ hair: i }))));
+    shirtRow.replaceChildren(...ALL_COLORS.map((c) => swatch(c, `${t('Color')} ${c}`, c === pick.color, () => change({}, c))));
   };
   paint();
 
   const surprise = h('button.btn', { type: 'button', title: t('Random look') }, t('🎲 Surprise me'));
-  surprise.addEventListener('click', () => change(randomLook(), AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]));
+  surprise.addEventListener('click', () => {
+    const randRole = FORMAL_ROLES[Math.floor(Math.random() * FORMAL_ROLES.length)];
+    role = randRole.id;
+    style = Math.random() > 0.3 ? 'suit' : 'smart';
+    try {
+      localStorage.setItem('ao_role', role);
+      localStorage.setItem('ao_style', style);
+    } catch {
+      // storage blocked
+    }
+    const newColor = FORMAL_COLORS[Math.floor(Math.random() * FORMAL_COLORS.length)];
+    change(randomLook(), newColor);
+  });
+
   const save = h('button.btn.primary', { type: 'submit' }, first ? t('Enter the office 🚪') : t('Save'));
-  const close = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: first ? `${t('Close')} (Esc)` : `${t('Close')} (Esc)` }, '✕');
+  const close = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
 
   const form = h(
     'form.modal.charsel',
@@ -205,13 +305,18 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
         h('label', {}, t('Your name')),
         account ? input : h('div.webhook', {}, input, reroll),
         account ? h('p.setting-note', {}, `🔑 Signed in as ${account.name}, so that's your name here.`) : null,
+        h('label', {}, t('Personality & Role')),
+        roleRow,
+        roleDesc,
+        h('label', {}, t('Attire style')),
+        attireRow,
         h('label', {}, t('Skin tone')),
         skinRow,
         h('label', {}, t('Hair')),
         styleRow,
         h('label', {}, t('Hair color')),
         hairRow,
-        h('label', {}, t('Shirt')),
+        h('label', {}, t('Suit & Shirt color')),
         shirtRow,
       ),
     ),
@@ -227,12 +332,10 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
     onSave(store.profile);
   };
   const modal = openModal(form, {
-    // A stray click shouldn't skip the first one; ✕ and Esc still do.
     backdropCloses: !first,
     doing: '🪞 picking a new look',
     onClose: () => {
       preview.dispose();
-      // The office only lets you in with a character: skipping it goes in with this one, and the name in the box.
       if (first && !done) finish(typedName());
     },
   });
@@ -243,3 +346,4 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
   });
   if (!account) setTimeout(() => input.focus(), 30);
 }
+

@@ -45,7 +45,7 @@ const SCOPE: Record<Scope, [label: string, title: string]> = {
 
 /** One setting: its name and who it's for, then whatever sets it. */
 const setting = (title: string, scope: Scope | null, ...body: Node[]) =>
-  h('div.setting', {}, h('div.setting-head', {}, h('h4', {}, title), scope && h('span.scope', { class: scope, title: SCOPE[scope][1] }, SCOPE[scope][0])), ...body);
+  h('div.setting', {}, h('div.setting-head', {}, h('h4', {}, t(title)), scope && h('span.scope', { class: scope, title: t(SCOPE[scope][1]) }, t(SCOPE[scope][0]))), ...body);
 
 /** Where ⚙️ Settings was last, so it opens there again. */
 let lastPane: SettingsPane = 'you';
@@ -509,8 +509,8 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     tabs.get(next)!.focus();
   });
 
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
-  const el = h('div.modal.settings', { role: 'dialog', 'aria-label': 'Settings' }, h('header', {}, h('h2', {}, '⚙️ Settings'), close), h('div.settings-body', {}, nav, ...bodies.values()));
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
+  const el = h('div.modal.settings', { role: 'dialog', 'aria-label': t('Settings') }, h('header', {}, h('h2', {}, `⚙️ ${t('Settings')}`), close), h('div.settings-body', {}, nav, ...bodies.values()));
   const offNotify = store.on('notify', paintHook);
   const offDog = store.on('dog', paintDog);
   const offTheme = store.on('theme', paintTheme);

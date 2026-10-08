@@ -5,6 +5,7 @@ import { store } from '../state';
 import { h, openModal, type Modal } from './dom';
 import { confirmDialog } from './prompt';
 import { copyButton } from './team';
+import { t } from './i18n';
 
 const NAMES: Record<SignInKind, string> = { claude: 'Claude', github: 'GitHub' };
 
@@ -18,17 +19,17 @@ let open: { modal: Modal; say(why?: string): void } | null = null;
  */
 export function openSignIns(net: Net, why?: string) {
   if (open) return open.say(why);
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
   const banner = h('p.team-status', { hidden: true });
   const cards = h('div.signins');
   const el = h(
     'div.modal',
-    { role: 'dialog', 'aria-label': 'Your sign-ins', style: 'width:min(640px,100%)' },
-    h('header', {}, h('h2', {}, '🔐 Your sign-ins'), close),
+    { role: 'dialog', 'aria-label': t('Your sign-ins'), style: 'width:min(640px,100%)' },
+    h('header', {}, h('h2', {}, `🔐 ${t('Your sign-ins')}`), close),
     h(
       'div.body.team',
       {},
-      h('p.note.lead', {}, 'Your workers run on your own Claude plan, and the office acts on GitHub as you: comments, merges and pull requests show up under your name. Only your workers use them.'),
+      h('p.note.lead', {}, t('Your workers run on your own Claude plan, and the office acts on GitHub as you: comments, merges and pull requests show up under your name. Only your workers use them.')),
       banner,
       cards,
       h('p.note', {}, 'Or open a 🐚 shell at any desk: it runs as you, so ', h('code', {}, 'claude auth login'), ' and ', h('code', {}, 'gh auth login'), ' typed there sign you in too.'),
@@ -37,7 +38,7 @@ export function openSignIns(net: Net, why?: string) {
 
   // Kept across renders, so a half-typed code or token survives the next update.
   const inputs = {
-    code: h('input', { type: 'text', placeholder: 'Paste the code here', 'aria-label': 'Code from the sign-in page', autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement,
+    code: h('input', { type: 'text', placeholder: t('Paste the code here'), 'aria-label': t('Code from the sign-in page'), autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement,
     claude: h('input', { type: 'password', placeholder: 'sk-ant-oat01-…', 'aria-label': 'Claude token', autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement,
     github: h('input', { type: 'password', placeholder: 'ghp_… or github_pat_…', 'aria-label': 'GitHub token', autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement,
   };
@@ -55,7 +56,7 @@ export function openSignIns(net: Net, why?: string) {
 
   const tokenRow = (which: SignInKind) => {
     const input = inputs[which];
-    const save = h('button.btn', { type: 'submit' }, 'Save');
+    const save = h('button.btn', { type: 'submit' }, t('Save'));
     const form = h('form.invite-row', {}, input, save) as HTMLFormElement;
     form.addEventListener('submit', (e) => {
       e.preventDefault();

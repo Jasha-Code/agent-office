@@ -1,6 +1,7 @@
 import './palette.css';
 import { rankItems, type PaletteItem, type PaletteMatch } from '../../shared/palette';
 import { h, openModal, type Modal } from './dom';
+import { t } from './i18n';
 
 // The command palette (Ctrl+K, ⌘K on a Mac): a few letters find a worker, an issue, a pull request,
 // a board, a teammate or an action, and Enter opens it the way clicking it in the office does.
@@ -28,22 +29,22 @@ export function togglePalette(entries: () => PaletteEntry[]) {
   const all = entries();
   const input = h('input', {
     type: 'text',
-    placeholder: 'Find a worker, issue, PR, board, teammate or action…',
+    placeholder: t('Find a worker, issue, PR, board, teammate or action…'),
     autocomplete: 'off',
     spellcheck: 'false',
-    'aria-label': 'Find anything in the office',
+    'aria-label': t('Find anything in the office'),
     role: 'combobox',
     'aria-controls': 'palette-list',
     'aria-expanded': 'true',
   });
   const list = h('ul.palette-list', { id: 'palette-list', role: 'listbox' });
-  const empty = h('p.note.palette-empty', {}, 'Nothing here matches that.');
+  const empty = h('p.note.palette-empty', {}, t('Nothing here matches that.'));
   const hint = h(
     'footer',
     {},
-    h('span.grow', {}, h('span.key', {}, '↵'), 'open ', h('span.key', {}, '⇧↵'), 'walk there first ', h('span.key', {}, '↑↓'), 'choose ', h('span.key', {}, 'Esc'), 'close'),
+    h('span.grow', {}, h('span.key', {}, '↵'), ` ${t('open')} `, h('span.key', {}, '⇧↵'), ` ${t('walk there first')} `, h('span.key', {}, '↑↓'), ` ${t('choose')} `, h('span.key', {}, 'Esc'), ` ${t('close')}`),
   );
-  const el = h('div.modal.palette', { role: 'dialog', 'aria-label': 'Command palette' }, h('div.palette-find', {}, input), list, empty, hint);
+  const el = h('div.modal.palette', { role: 'dialog', 'aria-label': t('Command palette') }, h('div.palette-find', {}, input), list, empty, hint);
 
   let found: PaletteMatch<PaletteEntry>[] = [];
   let at = 0;

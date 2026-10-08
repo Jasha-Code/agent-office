@@ -3,6 +3,7 @@ import type { WorkerInfo } from '../../shared/protocol';
 import { isBusy } from '../../shared/status';
 import { store } from '../state';
 import { h, openModal } from './dom';
+import { t } from './i18n';
 
 // A worker across repositories (see WorkerInfo.repos): one task in worktrees of several floors'
 // projects, all on the same branch, with a pull request in each repository it commits to.
@@ -30,9 +31,11 @@ export function openRepoPulls(workerId: string, actions: RepoPullsActions) {
   const title = h('h2');
   const note = h('p', { style: 'margin:0 0 12px;font-weight:700' });
   const list = h('ul.repo-pulls');
-  const close = h('button.btn', { type: 'button' }, 'Close');
-  const missing = h('button.btn.primary', { type: 'button' }, '🔀 Open the missing PRs');
-  const el = h('div.modal', { role: 'dialog', 'aria-label': 'Pull requests' }, h('header', {}, title), h('div.body', {}, note, list), h('footer', {}, h('span.grow'), close, missing));
+  const close = h('button.btn', { type: 'button' }, t('Close'));
+  const xClose = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
+  const missing = h('button.btn.primary', { type: 'button' }, `🔀 ${t('Open the missing PRs')}`);
+  const el = h('div.modal', { role: 'dialog', 'aria-label': t('Pull requests') }, h('header', {}, title, xClose), h('div.body', {}, note, list), h('footer', {}, h('span.grow'), close, missing));
+  xClose.addEventListener('click', () => modal.close());
 
   const render = () => {
     const w = store.workers.get(workerId);

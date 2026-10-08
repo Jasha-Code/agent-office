@@ -1,10 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Agent Office · Join</title>
+    <title>دفتر کار هوشمند · عضویت</title>
     <link rel="icon" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./login.css" />
   </head>
   <body>
@@ -12,17 +15,17 @@
       <div class="logo" aria-hidden="true">
         <svg viewBox="0 0 64 64" width="72" height="72"><rect x="6" y="30" width="52" height="8" rx="3" fill="#e0a96d"/><rect x="18" y="14" width="28" height="18" rx="3" fill="#2b2d42"/><rect x="21" y="17" width="22" height="12" rx="1" fill="#7cf29a"/><circle cx="32" cy="50" r="9" fill="#ff8a5b"/><circle cx="29" cy="48" r="1.8" fill="#222"/><circle cx="35" cy="48" r="1.8" fill="#222"/></svg>
       </div>
-      <h1 id="title">You're invited 🎉</h1>
-      <p class="sub" id="sub">Checking your invite…</p>
+      <h1 id="title">دعوت شده‌اید 🎉</h1>
+      <p class="sub" id="sub">در حال بررسی دعوت‌نامه…</p>
       <form id="form" hidden>
-        <label>Your name<input id="name" type="text" maxlength="24" autocomplete="username" spellcheck="false" required /></label>
-        <label>Pick a password<input id="password" type="password" minlength="8" autocomplete="new-password" required /></label>
-        <label>Once more<input id="again" type="password" minlength="8" autocomplete="new-password" required /></label>
-        <p class="note">At least 8 characters. It's yours alone: nobody else in the office ever sees it.</p>
-        <button type="submit" id="submit">Make my account</button>
+        <label>نام شما<input id="name" type="text" maxlength="24" autocomplete="username" spellcheck="false" required /></label>
+        <label>انتخاب رمز عبور<input id="password" type="password" minlength="8" autocomplete="new-password" required /></label>
+        <label>تکرار رمز عبور<input id="again" type="password" minlength="8" autocomplete="new-password" required /></label>
+        <p class="note">حداقل ۸ کاراکتر. این حساب متعلق به شماست و هیچ‌کس در دفتر آن را نخواهد دید.</p>
+        <button type="submit" id="submit">ایجاد حساب کاربری</button>
       </form>
       <p id="error" class="error" role="alert"></p>
-      <a id="login" href="/login" hidden>Go to sign in →</a>
+      <a id="login" href="/login" hidden>رفتن به صفحه ورود ←</a>
     </main>
     <script type="module" src="./join.ts"></script>
   </body>

@@ -6,6 +6,7 @@ import type { Net } from '../net';
 import { store } from '../state';
 import { h, openModal, timeAgo, toast, type Modal } from './dom';
 import { confirmDialog } from './prompt';
+import { t } from './i18n';
 
 // The elevator's panel: a button for every floor (every project), and "add a project", which clones
 // one of the repositories the office's gh login can see and makes it a new floor. The first time
@@ -76,17 +77,17 @@ export function openElevator(opts: ElevatorOptions): void {
 
   const floorsEl = h('div.floors');
   const addEl = h('div.add');
-  const input = h('input', { type: 'text', placeholder: 'Search your repositories, or type owner/name', 'aria-label': 'Repository', autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
-  const listEl = h('div.repo-list', { role: 'listbox', 'aria-label': 'Repositories' });
+  const input = h('input', { type: 'text', placeholder: t('Search your repositories, or type owner/name'), 'aria-label': t('Repository'), autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
+  const listEl = h('div.repo-list', { role: 'listbox', 'aria-label': t('Repositories') });
   const statusEl = h('div');
-  const addBtn = h('button.btn.primary', { type: 'button' }, '🛗 Add floor');
-  const refreshBtn = h('button.btn', { type: 'button', title: 'Ask GitHub for the list again' }, '↻');
-  const close = h('button.btn.close', { type: 'button', 'aria-label': 'Close', title: 'Close (Esc)' }, '✕');
+  const addBtn = h('button.btn.primary', { type: 'button' }, `🛗 ${t('Add floor')}`);
+  const refreshBtn = h('button.btn', { type: 'button', title: t('Ask GitHub for the list again') }, '↻');
+  const close = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
 
   // Where clones go. Admins can move it right here: the first project is when it matters.
-  const dirInput = h('input', { type: 'text', placeholder: '~/Workspace', 'aria-label': 'Workspace folder', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
-  const dirSave = h('button.btn.primary', { type: 'button' }, 'Save');
-  const dirCancel = h('button.btn', { type: 'button' }, 'Cancel');
+  const dirInput = h('input', { type: 'text', placeholder: '~/Workspace', 'aria-label': t('Workspace folder'), spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
+  const dirSave = h('button.btn.primary', { type: 'button' }, t('Save'));
+  const dirCancel = h('button.btn', { type: 'button' }, t('Cancel'));
   const dirEl = h('div.webhook.dir-pick.hidden', {}, dirInput, dirSave, dirCancel);
   const editDir = (on: boolean) => {
     dirEl.classList.toggle('hidden', !on);

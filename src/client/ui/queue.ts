@@ -7,6 +7,7 @@ import { confirmDialog } from './prompt';
 import { providerPicker, providerLabel, providerUsageState, providerWaitingLabel, resolvedProvider, modelBadge } from './provider';
 import { officeFull } from '../../shared/machine';
 import { dictateField } from './dictate';
+import { t } from './i18n';
 
 export interface QueueActions {
   openTerminal(workerId: string): void;
@@ -20,16 +21,16 @@ function taskTitle(t: QueueTask): HTMLElement {
   return h('div.queue-title', { title: t.prompt }, issue ? h('a', { href: issue.url, target: '_blank', rel: 'noopener' }, text) : text);
 }
 
-function outcome(t: QueueTask): string {
-  switch (t.outcome) {
+function outcome(task: QueueTask): string {
+  switch (task.outcome) {
     case 'done':
-      return t.pr ? 'finished' : 'finished, no PR found yet';
+      return task.pr ? t('finished') : t('finished, no PR found yet');
     case 'exited':
-      return t.error ? `stopped: ${t.error}` : 'stopped before finishing';
+      return task.error ? `${t('stopped')}: ${task.error}` : t('stopped before finishing');
     case 'killed':
-      return 'sent home';
+      return t('sent home');
     case 'failed':
-      return `couldn't start: ${t.error ?? 'unknown error'}`;
+      return `${t("couldn't start")}: ${task.error ?? t('unknown error')}`;
     default:
       return '';
   }
@@ -37,24 +38,24 @@ function outcome(t: QueueTask): string {
 
 export function openQueue(net: Net, actions: QueueActions) {
   const body = h('div.body.queue');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
   const limitValue = h('b');
-  const minus = h('button.btn', { type: 'button', title: 'Fewer workers at once', 'aria-label': 'Fewer workers at once' }, '−');
-  const plus = h('button.btn', { type: 'button', title: 'More workers at once', 'aria-label': 'More workers at once' }, '+');
-  const limit = h('div.queue-limit', { title: 'How many workers the queue keeps busy at once. 0 pauses it.' }, 'Workers at once', minus, limitValue, plus);
+  const minus = h('button.btn', { type: 'button', title: t('Fewer workers at once'), 'aria-label': t('Fewer workers at once') }, '−');
+  const plus = h('button.btn', { type: 'button', title: t('More workers at once'), 'aria-label': t('More workers at once') }, '+');
+  const limit = h('div.queue-limit', { title: t('How many workers the queue keeps busy at once. 0 pauses it.') }, t('Workers at once'), minus, limitValue, plus);
   minus.addEventListener('click', () => net.send({ t: 'queue.limit', maxWorkers: store.queue.maxWorkers - 1 }));
   plus.addEventListener('click', () => net.send({ t: 'queue.limit', maxWorkers: store.queue.maxWorkers + 1 }));
   const el = h(
     'div.modal',
-    { role: 'dialog', 'aria-label': 'Task queue', style: 'width:min(800px,100%)' },
-    h('header', {}, h('h2', {}, '📋 Task queue'), limit, close),
+    { role: 'dialog', 'aria-label': t('Task queue'), style: 'width:min(800px,100%)' },
+    h('header', {}, h('h2', {}, `📋 ${t('Task queue')}`), limit, close),
     body,
-    h('footer', {}, h('span.grow', {}, 'The queue keeps going while you are away. Set “workers at once” to 0 to pause it.')),
+    h('footer', {}, h('span.grow', {}, t('The queue keeps going while you are away. Set “workers at once” to 0 to pause it.'))),
   );
 
-  const ta = h('textarea', { rows: 2, placeholder: 'Describe a task for the next free worker…', 'aria-label': 'New task' }) as HTMLTextAreaElement;
+  const ta = h('textarea', { rows: 2, placeholder: t('Describe a task for the next free worker…'), 'aria-label': t('New task') }) as HTMLTextAreaElement;
   const provider = providerPicker(store.project, 'queue-provider');
-  const addBtn = h('button.btn.primary', { type: 'submit' }, 'Add to queue');
+  const addBtn = h('button.btn.primary', { type: 'submit' }, t('Add to queue'));
   const form = h('form.queue-add', {}, dictateField(ta), provider.element, addBtn) as HTMLFormElement;
   form.noValidate = true;
   const submit = () => {
@@ -149,7 +150,7 @@ export function openQueue(net: Net, actions: QueueActions) {
 
   const render = () => {
     const q = store.queue;
-    limitValue.textContent = q.maxWorkers === 0 ? 'Paused' : String(q.maxWorkers);
+    limitValue.textContent = q.maxWorkers === 0 ? t('Paused') : String(q.maxWorkers);
     minus.toggleAttribute('disabled', q.maxWorkers <= 0);
     const running = q.tasks.filter((t) => t.status === 'running');
     const queued = q.tasks.filter((t) => t.status === 'queued');
@@ -159,19 +160,15 @@ export function openQueue(net: Net, actions: QueueActions) {
       h(
         'p.note',
         {},
-        'Or open the 📌 Issues board and click ',
-        h('b', {}, 'Add to queue'),
-        ' on an issue. Whenever a desk is free and fewer than ',
-        h('b', {}, q.maxWorkers === 0 ? '0' : String(q.maxWorkers)),
-        " of its tasks are running, the next task gets a fresh worker in its own git worktree (workers you hire yourself don't count). Issues are assigned on GitHub when they start, and the pull request is linked when it shows up.",
+        t('Or open the 📌 Issues board and click Add to queue on an issue.'),
       ),
       queued.length && officeFull(m)
-        ? h('p.note', {}, `⏸ The office is at its limit of ${m.limit} worker${m.limit === 1 ? '' : 's'}, so the next task waits until one goes home. A queue worker that's finished goes home by itself to make room.`)
+        ? h('p.note', {}, `⏸ ${t('Office is full, waiting for workers to finish.')}`)
         : null,
-      section('🤖 Working on it', running),
-      section('⏳ Up next', queued),
-      section('✅ Finished', done, h('button.btn', { type: 'button', onclick: () => net.send({ t: 'queue.clear' }) }, 'Clear')),
-      running.length + queued.length + done.length ? null : h('div.queue-empty', {}, 'Nothing on the queue yet.'),
+      section(`🤖 ${t('Working on it')}`, running),
+      section(`⏳ ${t('Up next')}`, queued),
+      section(`✅ ${t('Finished')}`, done, h('button.btn', { type: 'button', onclick: () => net.send({ t: 'queue.clear' }) }, t('Clear'))),
+      running.length + queued.length + done.length ? null : h('div.queue-empty', {}, t('Nothing on the queue yet.')),
     ];
     list.replaceChildren(...parts.filter((n): n is HTMLElement => n !== null));
   };
