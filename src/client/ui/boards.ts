@@ -9,6 +9,7 @@ import { inProgress } from './github/progress';
 import type { BoardActions } from './github/prompts';
 import { openPull } from './github/pull-window';
 import { providerLabel } from './provider';
+import { t } from './i18n';
 
 const TILTS = ['-1.2deg', '0.8deg', '-0.4deg', '1.4deg', '0deg', '-0.9deg'];
 const NOTE_COLORS = ['#fff7b0', '#ffd6e0', '#caffbf', '#bde0fe', '#ffe5b4'];
@@ -29,20 +30,20 @@ function issueColumns(items: GhIssue[]): Column<GhIssue>[] {
   const started = open.filter((i) => inProgress(i, store.taskForIssue(i.number)));
   const todo = open.filter((i) => !started.includes(i));
   return [
-    { key: 'open', title: '📥 Open', items: todo },
-    { key: 'progress', title: '🚧 In progress', items: started },
-    { key: 'closed', title: '✅ Closed', items: items.filter((i) => i.state !== 'OPEN').sort(byUpdated), max: 40 },
+    { key: 'open', title: `📥 ${t('Open')}`, items: todo },
+    { key: 'progress', title: `🚧 ${t('In progress')}`, items: started },
+    { key: 'closed', title: `✅ ${t('Closed')}`, items: items.filter((i) => i.state !== 'OPEN').sort(byUpdated), max: 40 },
   ];
 }
 
 function pullColumns(items: GhPull[]): Column<GhPull>[] {
   const open = items.filter((p) => p.state === 'OPEN');
   return [
-    { key: 'draft', title: '✏️ Draft', items: open.filter((p) => p.isDraft) },
-    { key: 'review', title: '👀 In review', items: open.filter((p) => !p.isDraft && p.reviewDecision !== 'APPROVED') },
-    { key: 'approved', title: '👍 Approved', items: open.filter((p) => !p.isDraft && p.reviewDecision === 'APPROVED') },
-    { key: 'merged', title: '🎉 Merged', items: items.filter((p) => p.state === 'MERGED').sort(byUpdated), max: 30 },
-    { key: 'closed', title: '🗑️ Closed', items: items.filter((p) => p.state === 'CLOSED').sort(byUpdated), max: 20 },
+    { key: 'draft', title: `✏️ ${t('Draft')}`, items: open.filter((p) => p.isDraft) },
+    { key: 'review', title: `👀 ${t('In review')}`, items: open.filter((p) => !p.isDraft && p.reviewDecision !== 'APPROVED') },
+    { key: 'approved', title: `👍 ${t('Approved')}`, items: open.filter((p) => !p.isDraft && p.reviewDecision === 'APPROVED') },
+    { key: 'merged', title: `🎉 ${t('Merged')}`, items: items.filter((p) => p.state === 'MERGED').sort(byUpdated), max: 30 },
+    { key: 'closed', title: `🗑️ ${t('Closed')}`, items: items.filter((p) => p.state === 'CLOSED').sort(byUpdated), max: 20 },
   ];
 }
 
@@ -120,7 +121,7 @@ function card(n: number, title: string, meta: (Node | string)[], i: number, oncl
       onclick,
       onkeydown: ((e: KeyboardEvent) => e.key === 'Enter' && e.target === e.currentTarget && onclick()) as EventListener,
     },
-    h('button.card-labels', { type: 'button', title: 'Change the labels', 'aria-label': `Change the labels on #${n}`, onclick: ((e: Event) => (e.stopPropagation(), onLabels())) as EventListener }, '🏷️'),
+    h('button.card-labels', { type: 'button', title: t('Change the labels'), 'aria-label': `${t('Change the labels on')} #${n}`, onclick: ((e: Event) => (e.stopPropagation(), onLabels())) as EventListener }, '🏷️'),
     h('div.num', {}, `#${n}`),
     h('div.ttl', {}, title),
     h('div.meta', {}, ...meta.filter((m) => m !== '').map((m) => (typeof m === 'string' ? h('span', {}, m) : m))),
@@ -130,9 +131,9 @@ function card(n: number, title: string, meta: (Node | string)[], i: number, oncl
 export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActions) {
   const body = h('div.body');
   const status = h('span.board-status');
-  const refresh = h('button.btn', { title: 'Refresh from GitHub', onclick: () => net.send({ t: 'gh.refresh' }) }, '🔄 Refresh');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
-  const el = h('div.modal.board', { role: 'dialog', 'aria-label': kind === 'issues' ? 'Issues board' : 'Pull requests board' }, h('header', {}, h('h2', {}, kind === 'issues' ? '📌 Issues' : '🔀 Pull Requests'), status, refresh, close), body);
+  const refresh = h('button.btn', { title: t('Refresh from GitHub'), onclick: () => net.send({ t: 'gh.refresh' }) }, `🔄 ${t('Refresh')}`);
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
+  const el = h('div.modal.board', { role: 'dialog', 'aria-label': kind === 'issues' ? t('Issues board') : t('Pull requests board') }, h('header', {}, h('h2', {}, kind === 'issues' ? `📌 ${t('Issues')}` : `🔀 ${t('Pull Requests')}`), status, refresh, close), body);
 
   const filters = loadFilters(kind);
   /** What each column's filter box holds (column key → text), for as long as the board is open. */
@@ -162,9 +163,9 @@ export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActi
         ),
       );
     }
-    if (!names.length) list.append(h('small', {}, 'No labels on this board yet.'));
-    const hint = picked.length ? 'Showing cards with any of these labels' : 'Pick labels to show only their cards';
-    return h('div.col-filter', {}, list, h('div.col-filter-foot', {}, h('small', {}, hint), picked.length ? h('button.btn.small', { type: 'button', onclick: () => setFilter(col.key, []) }, 'Clear') : null));
+    if (!names.length) list.append(h('small', {}, t('No labels on this board yet.')));
+    const hint = picked.length ? t('Showing cards with any of these labels') : t('Pick labels to show only their cards');
+    return h('div.col-filter', {}, list, h('div.col-filter-foot', {}, h('small', {}, hint), picked.length ? h('button.btn.small', { type: 'button', onclick: () => setFilter(col.key, []) }, t('Clear')) : null));
   };
 
   /** A column of cards. Type in its box to narrow it by title; click its header to filter it by label. */
@@ -177,13 +178,13 @@ export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActi
     const search = h('input', {
       type: 'text',
       value: queries[col.key] ?? '',
-      placeholder: 'Filter by title…',
-      'aria-label': `Filter ${name} by title`,
+      placeholder: t('Filter by title…'),
+      'aria-label': `${t('Filter by title…')} (${name})`,
       'data-focus': `search:${col.key}`,
       spellcheck: 'false',
       autocomplete: 'off',
     }) as HTMLInputElement;
-    const clear = h('button.col-search-clear', { type: 'button', 'aria-label': 'Clear the title filter', title: 'Clear' }, '✕');
+    const clear = h('button.col-search-clear', { type: 'button', 'aria-label': t('Clear the title filter'), title: t('Clear') }, '✕');
     const section = h('section.column');
     /** Deals the cards that match both filters. Typing only redoes this column, so the box keeps focus. */
     const fill = () => {
@@ -191,7 +192,7 @@ export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActi
       const matching = words.length ? labelled.filter((it) => words.every((w) => it.title.toLowerCase().includes(w))) : labelled;
       const shown = matching.slice(0, col.max);
       ul.replaceChildren(...shown.map((it, i) => cardOf(it, i)));
-      if (!shown.length) ul.append(h('li.empty', {}, words.length ? `No titles match “${search.value.trim()}”${picked.length ? ' with those labels' : ''}` : picked.length ? 'Nothing here with those labels' : 'Nothing here'));
+      if (!shown.length) ul.append(h('li.empty', {}, words.length ? `No titles match “${search.value.trim()}”${picked.length ? ' with those labels' : ''}` : picked.length ? t('Nothing here with those labels') : t('Nothing here')));
       count.textContent = picked.length || words.length ? `${shown.length} / ${col.items.slice(0, col.max).length}` : String(shown.length);
       clear.classList.toggle('hidden', !search.value);
       section.classList.toggle('filtered', picked.length > 0 || words.length > 0);
@@ -213,7 +214,7 @@ export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActi
         type: 'button',
         'aria-expanded': String(open),
         'data-focus': col.key,
-        title: picked.length ? `Only cards labelled ${picked.join(' or ')}. Click to change.` : 'Filter by label',
+        title: picked.length ? `Only cards labelled ${picked.join(' or ')}. Click to change.` : t('Filter by label'),
         onclick: () => {
           picking = open ? null : col.key;
           render();
@@ -230,7 +231,7 @@ export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActi
           'div.col-active',
           {},
           ...picked.map((name) => labelChip({ name, color: all.get(name) ?? '#dddddd' })),
-          h('button.col-clear', { type: 'button', 'aria-label': 'Clear label filter', title: 'Show every card', onclick: () => setFilter(col.key, []) }, '✕'),
+          h('button.col-clear', { type: 'button', 'aria-label': t('Clear label filter'), title: t('Show every card'), onclick: () => setFilter(col.key, []) }, '✕'),
         ),
       );
     }
@@ -241,7 +242,7 @@ export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActi
 
   const render = () => {
     const st = kind === 'issues' ? store.issues : store.pulls;
-    status.textContent = st.loading ? 'Refreshing…' : st.fetchedAt ? `Updated ${timeAgo(st.fetchedAt)}` : '';
+    status.textContent = st.loading ? t('Refreshing…') : st.fetchedAt ? `${t('Updated')} ${timeAgo(st.fetchedAt)}` : '';
     // Every refresh rebuilds the columns, so note how far each was scrolled and put it back afterwards,
     // and keep focus (and the caret, in a filter box) on the header, label toggle or box it was on.
     const scrolled = [...body.querySelectorAll('.column > ul')].map((ul) => ul.scrollTop);
@@ -259,7 +260,7 @@ export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActi
       for (const col of issueColumns(store.issues.items)) {
         body.append(
           column(col, all, (it, i) =>
-            card(it.number, it.title, [...labelChips(it.labels), queueChip(it.number), it.assignees.length ? `👤 ${it.assignees.join(', ')}` : it.taken ? '🤖 handed to a worker' : `by ${it.author}`, it.comments ? `💬 ${it.comments}` : '', timeAgo(it.updatedAt)], i, () => openIssue(it, net, actions), () => openLabels('issue', it, net)),
+            card(it.number, it.title, [...labelChips(it.labels), queueChip(it.number), it.assignees.length ? `👤 ${it.assignees.join(', ')}` : it.taken ? t('🤖 handed to a worker') : `${t('by')} ${it.author}`, it.comments ? `💬 ${it.comments}` : '', timeAgo(it.updatedAt)], i, () => openIssue(it, net, actions), () => openLabels('issue', it, net)),
           ),
         );
       }
@@ -274,8 +275,8 @@ export function openBoard(kind: 'issues' | 'pulls', net: Net, actions: BoardActi
               [
                 w ? deskChip(w) : '',
                 ...labelChips(it.labels),
-                `by ${it.author}`,
-                it.reviewDecision === 'CHANGES_REQUESTED' ? '🛠 changes requested' : '',
+                `${t('by')} ${it.author}`,
+                it.reviewDecision === 'CHANGES_REQUESTED' ? t('🛠 changes requested') : '',
                 CHECK_ICON[it.checks],
                 h('span', { style: 'color:#2a9d4b' }, `+${it.additions}`),
                 h('span', { style: 'color:#c3423f' }, `-${it.deletions}`),

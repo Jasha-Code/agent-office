@@ -7,6 +7,7 @@ import { byIndex } from '../../../shared/whiteboard';
 import type { Net } from '../../net';
 import { store } from '../../state';
 import { h, openModal, toast, type Modal } from '../../ui/dom';
+import { t } from '../../ui/i18n';
 import type { WhiteboardApp } from './whiteboard-app';
 
 declare const __EXCALIDRAW_ASSETS__: string;
@@ -39,11 +40,11 @@ let redrawBoard = () => {};
 export function openWhiteboard(net: Net) {
   if (open) return;
   const floor = store.floor;
-  if (!floor) return toast('Take the elevator to a floor first', 'warn');
+  if (!floor) return toast(t('Take the elevator to a floor first'), 'warn');
   const people = h('div.wb-people');
   const close = h('button.btn.close', { 'aria-label': 'Close', title: 'Close (Esc)' }, '✕');
-  const host = h('div.wb-host', {}, h('div.wb-loading', {}, '✏️ Getting the markers out…'));
-  const el = h('div.wb-window', { role: 'dialog', 'aria-label': 'Whiteboard' }, h('header', {}, h('h2', {}, '📝 Whiteboard'), people, close), host);
+  const host = h('div.wb-host', {}, h('div.wb-loading', {}, t('✏️ Getting the markers out…')));
+  const el = h('div.wb-window', { role: 'dialog', 'aria-label': 'Whiteboard' }, h('header', {}, h('h2', {}, t('📝 Whiteboard')), people, close), host);
   // Esc first gets you out of whatever you're doing in Excalidraw (typing, drawing, a menu, a tool),
   // then lets go of what's selected, and once there's nothing left, closes the window.
   const onKey = (e: KeyboardEvent) => {
@@ -80,7 +81,7 @@ export function openWhiteboard(net: Net) {
       host.replaceChildren();
       board.app = m.mountWhiteboard(host, (msg) => net.send(msg), `${store.project?.name ?? 'office'} whiteboard`);
     },
-    () => host.replaceChildren(h('div.wb-loading', {}, "Couldn't load the whiteboard. Check your connection and open it again.")),
+    () => host.replaceChildren(h('div.wb-loading', {}, t("Couldn't load the whiteboard. Check your connection and open it again."))),
   );
 }
 
@@ -90,8 +91,8 @@ function renderPeople() {
   const others = store.drawing.filter((id) => id !== store.you).flatMap((id) => store.peers.get(id) ?? []);
   open.people.replaceChildren(
     ...(others.length
-      ? [h('span.wb-live', {}, 'LIVE'), ...others.map((p) => h('span.wb-person', { title: `${p.name} is drawing` }, h('span.dot', { style: `background:${p.color}` }), p.name))]
-      : [h('span.wb-alone', {}, 'Just you for now. Anyone on this floor can join in.')]),
+      ? [h('span.wb-live', {}, t('LIVE')), ...others.map((p) => h('span.wb-person', { title: `${p.name} ${t('is drawing')}` }, h('span.dot', { style: `background:${p.color}` }), p.name))]
+      : [h('span.wb-alone', {}, t('Just you for now. Anyone on this floor can join in.'))]),
   );
 }
 

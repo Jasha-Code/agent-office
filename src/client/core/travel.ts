@@ -9,6 +9,7 @@ import type { Arrival, Grip } from '../features/climbing/controller';
 import { lastSpot, store } from '../state';
 import { $, clip, closeAllModals, modalOpen, toast } from '../ui/dom';
 import { GARAGE, openElevator } from '../ui/elevator';
+import { t } from '../ui/i18n';
 import type { Ctx, TripKind } from './context';
 import type { CoreState } from './ctx';
 import { builtFloors, floorWings } from './floors';
@@ -88,8 +89,8 @@ export function installTravel(ctx: Ctx, core: CoreState, parts: TravelParts) {
     hint: (it) => {
       const f = store.currentFloor();
       const n = store.floors.length;
-      if (it === office.garageLift.interactable) return { k: `garage|${f?.name}|${n}`, parts: [hintTitle('🛗 Elevator'), aside(f ? `Garage · up to ${clip(f.name, 24)}` : 'Garage'), key('E', 'Choose a floor')] };
-      return { k: `${f?.name}|${n}`, parts: [hintTitle('🛗 Elevator'), f ? aside(`${f.name} · ${n} floor${n === 1 ? '' : 's'}`) : '', key('E', n > 1 ? 'Choose a floor' : 'Floors & projects')] };
+      if (it === office.garageLift.interactable) return { k: `garage|${f?.name}|${n}`, parts: [hintTitle(t('🛗 Elevator')), aside(f ? `${t('Garage')} · ${t('Up to')} ${clip(f.name, 24)}` : t('Garage')), key('E', t('Choose a floor'))] };
+      return { k: `${f?.name}|${n}`, parts: [hintTitle(t('🛗 Elevator')), f ? aside(`${f.name} · ${n} ${n === 1 ? t('floor') : t('floors')}`) : '', key('E', n > 1 ? t('Choose a floor') : t('Floors & projects'))] };
     },
     use: onE(() => showElevator()),
   });

@@ -2,6 +2,7 @@ import type * as THREE from 'three';
 import type { WorkerStatus, WorkerTask } from '../../../shared/protocol';
 import { isAsleep, type WorkerPr } from '../../../shared/status';
 import { cardSprite, textSprite } from '../toon';
+import { t } from '../../ui/i18n';
 
 // What a worker shows of how it's getting on: its status light, and the bubble or task card over its head.
 
@@ -48,14 +49,15 @@ export function bubbleFor(status: WorkerStatus, bounce: boolean, task: WorkerTas
   // Not working on or waiting for something more: its pull request in place of ready / done / asleep.
   const prLabel = pr && status !== 'working' && status !== 'needs_input' && status !== 'starting' ? `${PR_ICON[pr.state]} PR #${pr.number} ${pr.state}` : undefined;
   const bubble = lost
-    ? '🌿 worktree deleted'
-    : prLabel ?? (status === 'needs_input' ? NEEDS_YOU.text : status === 'done' && bounce ? '✅ done!' : status === 'working' ? '⌨️ working' : isAsleep(status) ? '💤' : '');
+    ? t('🌿 WORKTREE DELETED')
+    : prLabel ?? (status === 'needs_input' ? t(NEEDS_YOU.text) : status === 'done' && bounce ? t('✅ done!') : status === 'working' ? t('⌨️ working') : isAsleep(status) ? '💤' : '');
   const key = `${lost}|${border}|${prLabel}|${task ? `${status}|${bounce}|${task.name}|${task.summary}` : bubble}`;
   return {
     key,
     draw: () => {
       if (task) {
-        const [text, chipBg, color] = lost ? LOST_CHIP : prLabel ? [prLabel.toUpperCase(), border!, '#ffffff'] : (TASK_CHIP[status] ?? TASK_CHIP.idle);
+        const [rawText, chipBg, color] = lost ? LOST_CHIP : prLabel ? [prLabel.toUpperCase(), border!, '#ffffff'] : (TASK_CHIP[status] ?? TASK_CHIP.idle);
+        const text = prLabel ? rawText : t(rawText);
         return cardSprite({ chip: { text, bg: chipBg, color }, title: task.name, body: task.summary, bg: isAsleep(status) ? '#e9ecef' : bg, border });
       }
       if (asking) return textSprite(bubble, { bg: NEEDS_YOU.bg, color: NEEDS_YOU.color, size: NEEDS_YOU.size, border: pr && border });

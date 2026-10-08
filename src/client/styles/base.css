@@ -16,7 +16,7 @@
   --info: #5bc0eb;
   --shadow: 0 4px 0 var(--ink);
   --radius: 16px;
-  --font: 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, sans-serif;
+  --font: 'Vazirmatn', 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -126,3 +126,74 @@ a.when:hover { text-decoration: underline; }
 .pd-side input[type=text] { width: 100%; font: inherit; font-size: 13px; border: 2px solid var(--ink); border-radius: 10px; padding: 5px 9px; background: #fff; outline: none; }
 .elevator .dir-change { margin-left: 6px; padding: 1px 8px; font-size: 12px; border-width: 2px; border-radius: 9px; box-shadow: 0 2px 0 var(--ink); vertical-align: baseline; }
 .meeting-field label { margin: 0; }
+
+/* RTL and Persian layout support */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+[dir="rtl"] .key {
+  margin-right: 0;
+  margin-left: 5px;
+}
+[dir="rtl"] .topbar {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .dock {
+  justify-content: flex-start;
+}
+[dir="rtl"] .side {
+  right: auto;
+  left: 12px;
+}
+[dir="rtl"] .chat {
+  left: auto;
+  right: 12px;
+}
+[dir="rtl"] #shares, [dir="rtl"] .caffeine {
+  left: auto;
+  right: 12px;
+}
+[dir="rtl"] .modal header {
+  flex-direction: row;
+}
+[dir="rtl"] .modal header .close {
+  margin-right: auto;
+  margin-left: 0;
+}
+[dir="rtl"] .modal footer {
+  justify-content: flex-start;
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .settings-tab {
+  text-align: right;
+}
+[dir="rtl"] .settings-nav {
+  border-right: none;
+  border-left: 3px solid var(--ink);
+}
+[dir="rtl"] .lite-bar {
+  flex-direction: row-reverse;
+}
+
+input[type="checkbox"], input[type="radio"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  vertical-align: middle;
+}
+[dir="rtl"] input[type="checkbox"],
+[dir="rtl"] input[type="radio"] {
+  margin-left: 8px;
+  margin-right: 0;
+}
+[dir="rtl"] label:has(> input[type="checkbox"]),
+[dir="rtl"] label:has(> input[type="radio"]),
+[dir="rtl"] .check,
+[dir="rtl"] .repo-pick,
+[dir="rtl"] .gh-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: right;
+}
+

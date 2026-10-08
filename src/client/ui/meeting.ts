@@ -9,6 +9,7 @@ import { providerPicker } from './provider';
 import { officePrompt } from './prompts';
 import { issueVars } from './github/prompts';
 import { dictateField } from './dictate';
+import { t } from './i18n';
 
 /** What a meeting called from an issue, a PR or a task starts out with. */
 export interface MeetingPreset {
@@ -38,17 +39,17 @@ const PART_LABEL: Record<MeetingTurn['state'], string> = { waiting: '⏳ up next
  * that calls one.
  */
 export function openMeeting(net: Net, actions: MeetingActions, preset?: MeetingPreset) {
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
-  const title = h('h2', {}, '🤝 Meeting room');
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
+  const title = h('h2', {}, `🤝 ${t('Meeting room')}`);
   const body = h('div.body.meeting');
   const foot = h('footer');
-  const el = h('div.modal.meeting-window', { role: 'dialog', 'aria-label': 'Meeting room' }, h('header', {}, title, close), body, foot);
+  const el = h('div.modal.meeting-window', { role: 'dialog', 'aria-label': t('Meeting room') }, h('header', {}, title, close), body, foot);
   let view: 'status' | 'form' = preset || !store.meeting.current ? 'form' : 'status';
   let form: ReturnType<typeof meetingForm> | null = null;
   const render = () => {
     if (view === 'status' && store.meeting.current) {
       form = null;
-      title.textContent = '🤝 Meeting room';
+      title.textContent = `🤝 ${t('Meeting room')}`;
       renderStatus(store.meeting.current, body, foot, net, actions, () => {
         view = 'form';
         render();

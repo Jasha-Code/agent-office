@@ -1,4 +1,5 @@
 import type { ModelsProgress } from '../world/models';
+import { currentLang, t } from './i18n';
 
 /**
  * The loading screen: the card in index.html, up from the page's first paint while the code downloads,
@@ -72,7 +73,12 @@ const FADE_MS = 600;
  */
 export function loadingScreen(watchModels: (fn: (p: ModelsProgress) => void) => () => void, capMs = CAP_MS): LoadingScreen {
   const screen = document.getElementById('loading');
+  const nameEl = screen?.querySelector<HTMLElement>('.loading-name');
+  if (nameEl && currentLang() === 'fa') {
+    nameEl.textContent = 'دفتر کار ایجنت‌ها';
+  }
   const bar = screen?.querySelector<HTMLElement>('.loading-bar');
+  bar?.setAttribute('aria-label', t('Loading'));
   const fill = screen?.querySelector<HTMLElement>('.loading-fill');
   const line = screen?.querySelector<HTMLElement>('.loading-say');
 
@@ -98,7 +104,8 @@ export function loadingScreen(watchModels: (fn: (p: ModelsProgress) => void) => 
     fillTo((files.done + steps.filter((s) => s.settled).length) / (files.asked + steps.length));
     // Files still coming in before the office is built, then whichever step is next.
     const unpacking = !given && files.done < files.asked;
-    const say = (unpacking ? 'Unpacking the office' : steps.find((s) => !s.settled)?.step.say) ?? 'Opening the doors';
+    const rawSay = (unpacking ? 'Unpacking the office' : steps.find((s) => !s.settled)?.step.say) ?? 'Opening the doors';
+    const say = t(rawSay);
     if (line && line.textContent !== say) line.textContent = say;
   };
   const gate = new Gate((why) => {

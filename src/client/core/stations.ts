@@ -4,6 +4,7 @@ import { Worker } from '../world/character';
 import type { DeskView } from '../world/types';
 import type { World } from '../world/world';
 import { noOutline } from './outline';
+import { t } from '../ui/i18n';
 
 /** What each board agent is for: its board's icon, what it offers on the card over its head, and an example ask. */
 export const STATION_INFO: Record<StationKind, { icon: string; offer: string; does: string; example: string }> = {
@@ -23,9 +24,9 @@ export function idleAgentsIn(w: World): IdleAgent[] {
   return w.plan.stations.map((def) => {
     const kind = def.station!;
     const agent = STATION_AGENT[kind];
-    const model = new Worker(agent.name, agent.color);
+    const model = new Worker(t(agent.name), agent.color);
     model.setStatus('idle', false);
-    model.setTask({ name: STATION_INFO[kind].offer, summary: STATION_INFO[kind].does });
+    model.setTask({ name: t(STATION_INFO[kind].offer), summary: t(STATION_INFO[kind].does) });
     model.setOutfit(w.plan.agents.outfit === 'peasant' ? 'peasant' : null);
     const view = w.desks.get(def.id)!;
     view.vacancy.children[0].add(model.root);

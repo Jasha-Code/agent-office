@@ -194,6 +194,8 @@ export class Hands {
    * for Christmas. Null gives you your own back.
    */
   setCostume(theme: Theme | null) {
+    const formal = (localStorage.getItem('ao_style') as string) || 'suit';
+    if (formal !== 'casual' && theme === 'halloween') theme = null;
     if (theme === this.costume) return;
     this.costume = theme;
     const warlock = theme === 'halloween';

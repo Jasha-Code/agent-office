@@ -12,6 +12,7 @@ import type { Person } from '../../world/character';
 import { Basketball, IN_HANDS } from './world';
 import type { Interactable } from '../../world/types';
 import { disposeSprite, textSprite } from '../../world/toon';
+import { t } from '../../ui/i18n';
 
 // The kinds of thing you can use that this defines (see InteractKinds in world/types.ts).
 declare module '../../world/types' {
@@ -67,7 +68,7 @@ export function installBasketball(ctx: Ctx, deps: BasketballDeps) {
 
   /** E at the ball: it's yours, if nobody beats you to it. */
   function takeBall() {
-    if (ctx.carrying()) return toast('🗂️ Your hands are full: put the card back first (Q)', 'warn');
+    if (ctx.carrying()) return toast(t('🗂️ Your hands are full: put the card back first (Q)'), 'warn');
     if (ball.holder) return;
     deps.reach();
     ctx.sound.ball('bounce', ball.at, 1.5);
@@ -79,7 +80,7 @@ export function installBasketball(ctx: Ctx, deps: BasketballDeps) {
 
   ctx.interactions.define('ball', {
     reach: 3.2,
-    hint: () => ({ k: String(ball.still), parts: [hintTitle('🏀 Basketball'), ball.still ? aside('shoot some hoops') : '', key('E', ball.still ? 'Pick it up' : 'Catch it!')] }),
+    hint: () => ({ k: String(ball.still), parts: [hintTitle(t('🏀 Basketball')), ball.still ? aside(t('shoot some hoops')) : '', key('E', t(ball.still ? 'Pick it up' : 'Catch it!'))] }),
     use: onE(() => takeBall()),
   });
 
@@ -240,10 +241,10 @@ export function installBasketball(ctx: Ctx, deps: BasketballDeps) {
     return {
       k: `${streak}|${first}|${!!windFrom}`,
       parts: [
-        h('span.title', {}, '🏀 Ball in hand'),
-        streak > 1 ? aside(`🔥 ${streak} in a row`) : '',
-        windFrom ? aside('let go in the green!') : key(first ? 'E / Click' : 'E', 'Hold to shoot'),
-        key('Q', 'Drop it'),
+        h('span.title', {}, t('🏀 Ball in hand')),
+        streak > 1 ? aside(`🔥 ${streak} ${t('in a row')}`) : '',
+        windFrom ? aside(t('let go in the green!')) : key(first ? 'E / Click' : 'E', t('Hold to shoot')),
+        key('Q', t('Drop it')),
       ],
     };
   }

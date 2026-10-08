@@ -4,6 +4,7 @@ import { h, openModal } from './dom';
 import { store } from '../state';
 import { providerPicker, type ProviderPicker } from './provider';
 import { dictateField } from './dictate';
+import { t } from './i18n';
 
 export interface PromptOptions {
   title: string;
@@ -49,38 +50,40 @@ export function repoPicker(options: { id: string; name: string }[] | undefined, 
     if (!wtBox.checked) for (const p of picks) p.box.checked = false;
   });
   return {
-    element: h('div.repo-picks', { role: 'group', 'aria-label': 'Other projects to work in' }, h('span', {}, '🗂️ Also work in'), ...picks.map((p) => p.el)),
+    element: h('div.repo-picks', { role: 'group', 'aria-label': t('Other projects to work in') }, h('span', {}, `🗂️ ${t('Also work in')}`), ...picks.map((p) => p.el)),
     value: () => picks.filter((p) => p.box.checked).map((p) => p.id),
   };
 }
 
 export function openPrompt(opts: PromptOptions) {
-  const ta = h('textarea', { rows: 7, placeholder: opts.placeholder ?? 'What should the worker work on?', 'aria-label': 'Prompt' }) as HTMLTextAreaElement;
+  const ta = h('textarea', { rows: 7, placeholder: opts.placeholder ?? t('What should the worker work on?'), 'aria-label': t('Prompt') }) as HTMLTextAreaElement;
   ta.value = opts.initial ?? '';
   const wtBox = h('input', { type: 'checkbox', id: 'wt-toggle' }) as HTMLInputElement;
   wtBox.checked = worktreePref();
   const wtRow = opts.worktreeOption
     ? h(
         'label',
-        { for: 'wt-toggle', style: 'display:flex;gap:8px;align-items:center;margin:10px 0 0;font-weight:700;cursor:pointer', title: 'Isolate this worker on its own branch so parallel workers never collide' },
+        { for: 'wt-toggle', style: 'display:flex;gap:8px;align-items:center;margin:10px 0 0;font-weight:700;cursor:pointer', title: t('Isolate this worker on its own branch so parallel workers never collide') },
         wtBox,
-        '🌿 Work in its own git worktree & branch',
+        `🌿 ${t('Work in its own git worktree & branch')}`,
     )
     : null;
   const repos = repoPicker(opts.worktreeOption ? opts.repoOptions : undefined, wtBox);
   const provider: ProviderPicker | null = opts.providerOption ? providerPicker(store.project, 'prompt-provider') : null;
-  const submit = h('button.btn.primary', { type: 'submit' }, opts.submitLabel ?? 'Send ✨');
-  const cancel = h('button.btn', { type: 'button' }, 'Cancel');
+  const submit = h('button.btn.primary', { type: 'submit' }, opts.submitLabel ? t(opts.submitLabel) : t('Send ✨'));
+  const cancel = h('button.btn', { type: 'button' }, t('Cancel'));
+  const close = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
   const form = h(
     'form.modal',
     { role: 'dialog', 'aria-label': opts.title },
-    h('header', {}, h('h2', {}, opts.title)),
+    h('header', {}, h('h2', {}, opts.title), close),
     h('div.body', {}, opts.warning ? h('p.setting-note.bad', { style: 'margin:0 0 10px', role: 'alert' }, opts.warning) : null, opts.subtitle ? h('p', { style: 'margin:0 0 10px;font-weight:700;color:var(--muted)' }, opts.subtitle) : null, dictateField(ta), provider?.element ?? null, wtRow, repos.element),
-    h('footer', {}, h('span.grow', {}, 'Enter to send · Shift+Enter for a new line'), cancel, submit),
+    h('footer', {}, h('span.grow', {}, t('Enter to send · Shift+Enter for a new line')), cancel, submit),
   ) as HTMLFormElement;
   form.noValidate = true;
 
   const modal = openModal(form);
+  close.addEventListener('click', () => modal.close());
   cancel.addEventListener('click', () => modal.close());
   const send = () => {
     const text = ta.value.trim();
@@ -117,10 +120,12 @@ export function openPrompt(opts: PromptOptions) {
 }
 
 export function confirmDialog(title: string, body: string, confirmLabel: string, onConfirm: () => void) {
-  const yes = h('button.btn.danger', { type: 'button' }, confirmLabel);
-  const no = h('button.btn', { type: 'button' }, 'Never mind');
-  const el = h('div.modal', { role: 'alertdialog', 'aria-label': title }, h('header', {}, h('h2', {}, title)), h('div.body', {}, h('p', { style: 'margin:0;font-weight:700' }, body)), h('footer', {}, no, yes));
+  const yes = h('button.btn.danger', { type: 'button' }, t(confirmLabel));
+  const no = h('button.btn', { type: 'button' }, t('Never mind'));
+  const close = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
+  const el = h('div.modal', { role: 'alertdialog', 'aria-label': title }, h('header', {}, h('h2', {}, title), close), h('div.body', {}, h('p', { style: 'margin:0;font-weight:700' }, body)), h('footer', {}, no, yes));
   const modal = openModal(el);
+  close.addEventListener('click', () => modal.close());
   no.addEventListener('click', () => modal.close());
   yes.addEventListener('click', () => {
     modal.close();
@@ -214,10 +219,11 @@ export function sendHomeDialog(opts: SendHomeOptions) {
   );
   const status = h('p.wt-status', {}, `Checking what ${branch} holds…`);
   const no = h('button.btn', { type: 'button' }, 'Never mind');
+  const close = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
   const form = h(
     'form.modal',
-    { role: 'dialog', 'aria-label': `Send ${opts.name} home?` },
-    h('header', {}, h('h2', {}, `Send ${opts.name} home?`)),
+    { role: 'dialog', 'aria-label': `${t('Send home')} ${opts.name}?` },
+    h('header', {}, h('h2', {}, `${t('Send home')} ${opts.name}?`), close),
     h(
       'div.body',
       {},
@@ -229,6 +235,7 @@ export function sendHomeDialog(opts: SendHomeOptions) {
   ) as HTMLFormElement;
   pick('keep');
   const modal = openModal(form);
+  close.addEventListener('click', () => modal.close());
   no.addEventListener('click', () => modal.close());
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -279,14 +286,15 @@ export function lostWorktreeDialog(opts: LostWorktreeOptions) {
     origin: `Its branch 🌿 ${branch} was deleted too, but it had been pushed: rebuilding checks origin's copy out again in the same place, and ${name} carries on its conversation.`,
     gone: `Its branch 🌿 ${branch} was deleted too and was never pushed, so the work on it is gone. Rebuilding makes the branch again from where it started, and ${name} carries on its conversation.`,
   }[opts.lost.branch];
-  const one = h('button.btn.primary', { type: 'button' }, 'Rebuild worktree');
-  const all = others.length ? h('button.btn', { type: 'button' }, `Rebuild all ${others.length + 1}`) : null;
-  const home = h('button.btn.danger', { type: 'button' }, 'Send home…');
-  const look = opts.openTerminal ? h('button.btn', { type: 'button' }, 'Open terminal') : null;
+  const one = h('button.btn.primary', { type: 'button' }, t('Rebuild worktree'));
+  const all = others.length ? h('button.btn', { type: 'button' }, `${t('Rebuild all')} ${others.length + 1}`) : null;
+  const home = h('button.btn.danger', { type: 'button' }, t('Send home…'));
+  const look = opts.openTerminal ? h('button.btn', { type: 'button' }, t('Open terminal')) : null;
+  const close = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
   const el = h(
     'div.modal.lost-worktree',
     { role: 'alertdialog', 'aria-label': title },
-    h('header', {}, h('h2', {}, title)),
+    h('header', {}, h('h2', {}, title), close),
     h(
       'div.body',
       {},
@@ -297,6 +305,7 @@ export function lostWorktreeDialog(opts: LostWorktreeOptions) {
     h('footer', {}, home, h('span.grow'), look, all, one),
   );
   const modal = openModal(el);
+  close.addEventListener('click', () => modal.close());
   const then = (fn: () => void) => () => {
     modal.close();
     fn();

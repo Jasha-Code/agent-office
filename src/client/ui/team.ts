@@ -4,6 +4,7 @@ import type { Net } from '../net';
 import { store } from '../state';
 import { h, openModal } from './dom';
 import { confirmDialog } from './prompt';
+import { t } from './i18n';
 
 export type Os = 'mac' | 'linux' | 'windows';
 export const OS_LABEL: Record<Os, string> = { mac: 'macOS', linux: 'Linux', windows: 'Windows' };
@@ -71,7 +72,7 @@ export async function copy(text: string): Promise<boolean> {
 export function copyButton(label: string, text: () => string, cls = '') {
   const btn = h('button.btn', { type: 'button', class: cls }, label);
   btn.addEventListener('click', async () => {
-    btn.textContent = (await copy(text())) ? '✓ Copied' : 'Copy failed';
+    btn.textContent = (await copy(text())) ? `✓ ${t('Copied')}` : t('Copy failed');
     setTimeout(() => (btn.textContent = label), 1600);
   });
   return btn;
@@ -87,14 +88,14 @@ export function openTeam(net: Net) {
   let os = guessOs();
   let status: HTMLElement | null = null;
   const body = h('div.body.team');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
-  const message = (t: TeamState) => (t.tailnet ? tailnetMessage(t) : inviteMessage(t, os));
-  const copyMsg = copyButton('✉️ Copy invite message', () => (store.team ? message(store.team) : ''), 'primary');
-  const footer = h('footer', {}, h('span.grow', {}, 'Invited people still need to sign in: the office password, or an account from 🔑 Accounts.'), copyMsg);
-  const el = h('div.modal', { role: 'dialog', 'aria-label': 'Invite teammates', style: 'width:min(680px,100%)' }, h('header', {}, h('h2', {}, '👥 Invite teammates'), close), body, footer);
+  const close = h('button.btn.close', { 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
+  const message = (tState: TeamState) => (tState.tailnet ? tailnetMessage(tState) : inviteMessage(tState, os));
+  const copyMsg = copyButton(`✉️ ${t('Copy invite message')}`, () => (store.team ? message(store.team) : ''), 'primary');
+  const footer = h('footer', {}, h('span.grow', {}, t('Invited people still need to sign in: the office password, or an account from 🔑 Accounts.')), copyMsg);
+  const el = h('div.modal', { role: 'dialog', 'aria-label': t('Invite teammates'), style: 'width:min(680px,100%)' }, h('header', {}, h('h2', {}, `👥 ${t('Invite teammates')}`), close), body, footer);
 
-  const input = h('input', { type: 'text', maxlength: 40, placeholder: 'GitHub username', 'aria-label': 'GitHub username', autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
-  const inviteBtn = h('button.btn.primary', { type: 'submit' }, 'Invite');
+  const input = h('input', { type: 'text', maxlength: 40, placeholder: t('GitHub username'), 'aria-label': t('GitHub username'), autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
+  const inviteBtn = h('button.btn.primary', { type: 'submit' }, t('Invite'));
   const form = h('form.invite-row', {}, input, inviteBtn) as HTMLFormElement;
   const setStatus = (text: string, kind: 'busy' | 'ok' | 'error') => {
     status = h('p.team-status', { class: kind }, text);

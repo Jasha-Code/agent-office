@@ -1,4 +1,4 @@
-export {}; // a module, so its names don't clash with the other pages' scripts
+import { t } from './ui/i18n';
 
 // An invite link, /join#<token>: make your own account, then walk in. The token rides in the
 // fragment, so it never reaches a server log or a Referer header.
@@ -24,30 +24,30 @@ async function post(body: Record<string, unknown>): Promise<{ ok: boolean; body:
 }
 
 async function peek() {
-  if (!token) return fail('This link is missing its invite code. Ask whoever sent it for the whole link.');
+  if (!token) return fail(t('This link is missing its invite code. Ask whoever sent it for the whole link.'));
   try {
     const r = await post({ peek: true });
-    if (!r.ok) return fail(r.body.error ?? 'This invite link does not work.');
+    if (!r.ok) return fail(r.body.error ?? t('This invite link does not work.'));
     const { name: invited, role, by, project } = r.body as { name?: string; role: string; by: string; project: string };
-    $('title').textContent = `Join the ${project} office`;
+    $('title').textContent = `${t('Join the')} ${project} ${t('office')}`;
     const sub = $('sub');
-    sub.replaceChildren(`${by} invited you${role === 'admin' ? ' as an ' : '. '}`);
+    sub.replaceChildren(`${by} ${t('invited you')}${role === 'admin' ? ` ${t('as an')} ` : '. '}`);
     if (role === 'admin') {
       const pill = document.createElement('span');
       pill.className = 'role';
-      pill.textContent = 'admin';
+      pill.textContent = t('admin');
       sub.append(pill, '.');
     }
-    sub.append(' Make your own account to come in.');
+    sub.append(` ${t('Make your own account to come in.')}`);
     if (invited) {
       name.value = invited;
       name.readOnly = true;
-      name.title = 'The name you were invited under';
+      name.title = t('The name you were invited under');
     }
     form.hidden = false;
     (invited ? password : name).focus();
   } catch {
-    fail('Server unreachable.');
+    fail(t('Server unreachable.'));
   }
 }
 
@@ -55,7 +55,7 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   error.textContent = '';
   if (password.value !== again.value) {
-    error.textContent = "Those passwords don't match";
+    error.textContent = t("Those passwords don't match");
     again.select();
     return;
   }
@@ -63,7 +63,7 @@ form.addEventListener('submit', async (e) => {
   try {
     const r = await post({ name: name.value.trim(), password: password.value });
     if (!r.ok) {
-      error.textContent = r.body.error ?? 'Could not make your account';
+      error.textContent = r.body.error ?? t('Could not make your account');
       return;
     }
     try {
@@ -73,7 +73,7 @@ form.addEventListener('submit', async (e) => {
     }
     location.replace('/');
   } catch {
-    error.textContent = 'Server unreachable';
+    error.textContent = t('Server unreachable');
   } finally {
     submit.disabled = false;
   }
