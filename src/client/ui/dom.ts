@@ -147,12 +147,12 @@ export function toast(text: string, level: 'info' | 'warn' | 'error' = 'info'): 
 }
 
 export function timeAgo(iso: string | number): string {
-  const t = typeof iso === 'number' ? iso : Date.parse(iso);
-  const s = Math.max(0, (Date.now() - t) / 1000);
-  if (s < 60) return 'just now';
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  return `${Math.floor(s / 86400)}d ago`;
+  const ts = typeof iso === 'number' ? iso : Date.parse(iso);
+  const s = Math.max(0, (Date.now() - ts) / 1000);
+  if (s < 60) return t('just now');
+  if (s < 3600) return `${Math.floor(s / 60)} ${t('m ago')}`;
+  if (s < 86400) return `${Math.floor(s / 3600)} ${t('h ago')}`;
+  return `${Math.floor(s / 86400)} ${t('d ago')}`;
 }
 
 /** `text` cut to at most `max` characters, with an ellipsis when it was longer. */

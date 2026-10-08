@@ -80,7 +80,7 @@ export function togglePalette(entries: () => PaletteEntry[]) {
           { id: `palette-${i}`, role: 'option', 'aria-selected': 'false', title: e.walk ? 'Enter opens it · Shift+Enter walks you there first' : 'Enter opens it' },
           h('span.palette-icon', {}, e.icon),
           h('span.palette-text', {}, h('span.palette-title', {}, ...marked(e.title, m.field === 'title' ? m.hits : [])), e.detail ? h('span.palette-detail', {}, ...marked(e.detail, m.field === 'detail' ? m.hits : [])) : null),
-          h('span.palette-kind', {}, e.kind),
+          h('span.palette-kind', {}, t(e.kind)),
         );
         row.addEventListener('mousemove', () => at !== i && select(i));
         // Before the input loses focus to it.

@@ -3,6 +3,7 @@ import type { Ctx } from '../../core/context';
 import { aside, hintTitle, key, onE } from '../../core/hint';
 import { store } from '../../state';
 import { clip } from '../../ui/dom';
+import { t } from '../../ui/i18n';
 import { openJukebox } from './ui';
 import type { SettingsPane } from '../../ui/settings';
 
@@ -33,7 +34,7 @@ export function installJukebox(ctx: Ctx, deps: JukeboxDeps) {
     hint: () => {
       const j = store.jukebox;
       const what = j.on ? trackTitle(j) : '';
-      return { k: `${j.on}|${what}`, parts: [hintTitle('🎵 Jukebox'), aside(j.on ? `♪ ${clip(what, 40)}` : 'off'), key('E', j.on ? 'Change the song' : 'Put on a song')] };
+      return { k: `${j.on}|${what}`, parts: [hintTitle(t('🎵 Jukebox')), aside(j.on ? `♪ ${clip(what, 40)}` : t('off')), key('E', t(j.on ? 'Change the song' : 'Put on a song'))] };
     },
     use: onE(() => showJukebox()),
   });

@@ -21,6 +21,7 @@ import { openTeam } from '../../ui/team';
 import { IS_MAC } from '../../ui/termkeys';
 import { openWhiteboard } from '../whiteboard/ui';
 import type { InteractKind, Interactable } from '../../world/types';
+import { deskLabel, t } from '../../ui/i18n';
 
 export type PaletteParts = Pick<Parts, 'walking' | 'waiting' | 'actions' | 'hud' | 'hanging' | 'meeting' | 'telescope'>;
 
@@ -75,10 +76,10 @@ export function installPalette(ctx: Ctx, parts: PaletteParts) {
         icon: desk?.station ? STATION_INFO[desk.station].icon : w.kind === 'shell' ? '🐚' : '🧑‍💻',
         kind: 'Worker',
         title: w.name,
-        detail: [w.task?.name, desk?.label, STATUS_LABEL[w.status]].filter(Boolean).join(' · '),
+        detail: [w.task?.name, desk && deskLabel(desk.label), STATUS_LABEL[w.status]].filter(Boolean).join(' · '),
         keywords: [w.title, w.worktree?.branch],
         open,
-        walk: desk && spot ? () => walkThen(spot, `${w.name} at ${desk.label}`, open, desk) : undefined,
+        walk: desk && spot ? () => walkThen(spot, `${w.name} ${t('at')} ${deskLabel(desk.label)}`, open, desk) : undefined,
       });
     }
 
@@ -87,24 +88,24 @@ export function installPalette(ctx: Ctx, parts: PaletteParts) {
     out.push({
       icon: '✨',
       kind: 'Action',
-      title: 'Hire a worker',
-      detail: free ? `At ${free.label}, the free desk nearest you` : 'Every desk is taken',
+      title: t('Hire a worker'),
+      detail: free ? `${deskLabel(free.label)}، ${t('the free desk nearest you')}` : t('Every desk is taken'),
       keywords: ['new worker', 'spawn an agent'],
       open: free ? hireAt(free) : () => toast('Every desk on this floor is taken', 'warn'),
       walk: free ? () => walkThen(deskSpot(free)!, free.label, hireAt(free), free) : undefined,
     });
-    out.push(at('queue', 'the task queue', { icon: '📋', kind: 'Action', title: 'Open the task queue', detail: 'Issues and tasks waiting for a worker', keywords: ['backlog', 'tasks'], open: showQueue }));
-    out.push({ icon: '⚙️', kind: 'Action', title: 'Settings', keywords: ['preferences', 'options'], open: () => parts.hud.showSettings() });
-    if (store.invites) out.push({ icon: '👥', kind: 'Action', title: 'Invite teammates', keywords: ['team', 'add people'], open: () => openTeam(net) });
-    else if (store.me.admin) out.push({ icon: '👥', kind: 'Action', title: 'Invite people', detail: 'Accounts', keywords: ['invite teammates', 'accounts', 'team'], open: () => openAccounts(net) });
-    out.push({ icon: '🖼️', kind: 'Action', title: 'Hang a picture', detail: 'On a wall of this floor', keywords: ['decorate', 'frame', 'art'], open: hanging.startHanging });
-    out.push({ icon: '🔎', kind: 'Action', title: 'Search the chat and every terminal', keywords: ['find'], open: showSearch });
+    out.push(at('queue', t('the task queue'), { icon: '📋', kind: 'Action', title: t('Open the task queue'), detail: t('Issues and tasks waiting for a worker'), keywords: ['backlog', 'tasks'], open: showQueue }));
+    out.push({ icon: '⚙️', kind: 'Action', title: t('Settings'), keywords: ['preferences', 'options'], open: () => parts.hud.showSettings() });
+    if (store.invites) out.push({ icon: '👥', kind: 'Action', title: t('Invite teammates'), keywords: ['team', 'add people'], open: () => openTeam(net) });
+    else if (store.me.admin) out.push({ icon: '👥', kind: 'Action', title: t('Invite people'), detail: t('Accounts'), keywords: ['invite teammates', 'accounts', 'team'], open: () => openAccounts(net) });
+    out.push({ icon: '🖼️', kind: 'Action', title: t('Hang a picture'), detail: t('On a wall of this floor'), keywords: ['decorate', 'frame', 'art'], open: hanging.startHanging });
+    out.push({ icon: '🔎', kind: 'Action', title: t('Search the chat and every terminal'), keywords: ['find'], open: showSearch });
 
-    out.push(at('issues', 'the Issues board', { icon: '📌', kind: 'Board', title: 'Issues board', open: () => openBoard('issues', net, actions.boardActions()) }));
-    out.push(at('pulls', 'the PR board', { icon: '🔀', kind: 'Board', title: 'PR board', keywords: ['pull requests'], open: () => openBoard('pulls', net, actions.boardActions()) }));
-    out.push(at('services', 'the Services board', { icon: '🌐', kind: 'Board', title: 'Services board', detail: 'Web servers the workers are running', open: () => openServices() }));
-    out.push(at('whiteboard', 'the whiteboard', { icon: '📝', kind: 'Board', title: 'Whiteboard', open: () => openWhiteboard(net) }));
-    out.push(at('meeting', 'the meeting room', { icon: '🤝', kind: 'Board', title: 'Meeting room', keywords: ['call a meeting'], open: () => meeting.showMeeting() }));
+    out.push(at('issues', t('the Issues board'), { icon: '📌', kind: 'Board', title: t('Issues board'), open: () => openBoard('issues', net, actions.boardActions()) }));
+    out.push(at('pulls', t('the PR board'), { icon: '🔀', kind: 'Board', title: t('PR board'), keywords: ['pull requests'], open: () => openBoard('pulls', net, actions.boardActions()) }));
+    out.push(at('services', t('the Services board'), { icon: '🌐', kind: 'Board', title: t('Services board'), detail: t('Web servers the workers are running'), open: () => openServices() }));
+    out.push(at('whiteboard', t('the whiteboard'), { icon: '📝', kind: 'Board', title: t('Whiteboard'), open: () => openWhiteboard(net) }));
+    out.push(at('meeting', t('the meeting room'), { icon: '🤝', kind: 'Board', title: t('Meeting room'), keywords: ['call a meeting'], open: () => meeting.showMeeting() }));
 
     for (const pr of store.pulls.items) {
       out.push(

@@ -14,11 +14,11 @@ export interface QueueActions {
 }
 
 /** The queue task's name, linked to its GitHub issue when it has one. */
-function taskTitle(t: QueueTask): HTMLElement {
-  if (t.issue === undefined) return h('div.queue-title', { title: t.prompt }, t.title);
-  const issue = store.issues.items.find((i) => i.number === t.issue);
-  const text = t.title.startsWith(`#${t.issue}`) ? t.title : `#${t.issue} ${t.title}`;
-  return h('div.queue-title', { title: t.prompt }, issue ? h('a', { href: issue.url, target: '_blank', rel: 'noopener' }, text) : text);
+function taskTitle(task: QueueTask): HTMLElement {
+  if (task.issue === undefined) return h('div.queue-title', { title: task.prompt }, task.title);
+  const issue = store.issues.items.find((i) => i.number === task.issue);
+  const text = task.title.startsWith(`#${task.issue}`) ? task.title : `#${task.issue} ${task.title}`;
+  return h('div.queue-title', { title: task.prompt }, issue ? h('a', { href: issue.url, target: '_blank', rel: 'noopener' }, text) : text);
 }
 
 function outcome(task: QueueTask): string {
@@ -84,11 +84,11 @@ export function openQueue(net: Net, actions: QueueActions) {
     return h('div', {}, h('h4', {}, title, h('span.count', {}, String(tasks.length)), extra ?? null), h('ul.queue-list', {}, ...tasks.map(row)));
   };
 
-  const row = (t: QueueTask): HTMLElement => {
-    const w = t.workerId ? store.workers.get(t.workerId) : undefined;
+  const row = (task: QueueTask): HTMLElement => {
+    const w = task.workerId ? store.workers.get(task.workerId) : undefined;
     const meta: string[] = [];
     const buttons: HTMLElement[] = [];
-    const badge = modelBadge(t.provider, t.model, t.effort);
+    const badge = modelBadge(task.provider, task.model, task.effort);
     const model = badge ? ` · initial: ${badge}` : '';
     const usageSuffix = (provider: AgentProvider | undefined, usage?: Usage) => {
       const state = providerUsageState(provider, store.project, usage);
@@ -98,48 +98,48 @@ export function openQueue(net: Net, actions: QueueActions) {
       return waiting ? ` · ${waiting}` : '';
     };
     let pos: string | null = null;
-    if (t.status === 'running') {
-      const selectedProvider = providerLabel(t.provider ?? w?.provider, store.project);
-      meta.push(`⚙️ ${selectedProvider}${model}${usageSuffix(t.provider ?? w?.provider, w?.usage)}`);
-      meta.push(`${t.workerName ?? 'a worker'} · ${w ? STATUS_LABEL[w.status] ?? w.status : 'gone'}`);
-      if (t.branch) meta.push(`🌿 ${t.branch}`);
-      if (t.startedAt) meta.push(`started ${timeAgo(t.startedAt)}`);
-      meta.push(`by ${t.addedBy}`);
+    if (task.status === 'running') {
+      const selectedProvider = providerLabel(task.provider ?? w?.provider, store.project);
+      meta.push(`⚙️ ${selectedProvider}${model}${usageSuffix(task.provider ?? w?.provider, w?.usage)}`);
+      meta.push(`${task.workerName ?? t('a worker')} · ${w ? STATUS_LABEL[w.status] ?? w.status : t('gone')}`);
+      if (task.branch) meta.push(`🌿 ${task.branch}`);
+      if (task.startedAt) meta.push(`${t('started')} ${timeAgo(task.startedAt)}`);
+      meta.push(`${t('by')} ${task.addedBy}`);
       if (w) {
-        buttons.push(h('button.btn', { type: 'button', onclick: () => actions.openTerminal(w.id) }, '🖥️ Terminal'));
+        buttons.push(h('button.btn', { type: 'button', onclick: () => actions.openTerminal(w.id) }, t('🖥️ Terminal')));
         buttons.push(
           h('button.btn', {
             type: 'button',
-            title: 'Send the worker home; the task counts as stopped',
-            onclick: () => confirmDialog(`Stop ${w.name}?`, `This sends ${w.name} home and stops the task. You can requeue it afterwards.`, 'Stop', () => net.send({ t: 'worker.kill', workerId: w.id })),
-          }, '⏹ Stop'),
+            title: t('Send the worker home; the task counts as stopped'),
+            onclick: () => confirmDialog(`${t('Stop')} ${w.name}?`, `This sends ${w.name} home and stops the task. You can requeue it afterwards.`, t('Stop'), () => net.send({ t: 'worker.kill', workerId: w.id })),
+          }, t('⏹ Stop')),
         );
       }
-    } else if (t.status === 'queued') {
+    } else if (task.status === 'queued') {
       const queued = store.queue.tasks.filter((x) => x.status === 'queued');
-      const i = queued.indexOf(t);
+      const i = queued.indexOf(task);
       pos = String(i + 1);
-      meta.push(`⚙️ ${providerLabel(t.provider, store.project)}${model}${usageSuffix(t.provider, w?.usage)}`);
-      meta.push(`added by ${t.addedBy} ${timeAgo(t.addedAt)}`);
-      buttons.push(h('button.btn', { type: 'button', title: 'Move up', 'aria-label': 'Move up', disabled: i === 0, onclick: () => net.send({ t: 'queue.move', taskId: t.id, delta: -1 }) }, '↑'));
-      buttons.push(h('button.btn', { type: 'button', title: 'Move down', 'aria-label': 'Move down', disabled: i === queued.length - 1, onclick: () => net.send({ t: 'queue.move', taskId: t.id, delta: 1 }) }, '↓'));
-      buttons.push(h('button.btn', { type: 'button', title: 'Remove from the queue', 'aria-label': 'Remove', onclick: () => net.send({ t: 'queue.remove', taskId: t.id }) }, '✕'));
+      meta.push(`⚙️ ${providerLabel(task.provider, store.project)}${model}${usageSuffix(task.provider, w?.usage)}`);
+      meta.push(`${t('added by')} ${task.addedBy} ${timeAgo(task.addedAt)}`);
+      buttons.push(h('button.btn', { type: 'button', title: t('Move up'), 'aria-label': t('Move up'), disabled: i === 0, onclick: () => net.send({ t: 'queue.move', taskId: task.id, delta: -1 }) }, '↑'));
+      buttons.push(h('button.btn', { type: 'button', title: t('Move down'), 'aria-label': t('Move down'), disabled: i === queued.length - 1, onclick: () => net.send({ t: 'queue.move', taskId: task.id, delta: 1 }) }, '↓'));
+      buttons.push(h('button.btn', { type: 'button', title: t('Remove from the queue'), 'aria-label': t('Remove'), onclick: () => net.send({ t: 'queue.remove', taskId: task.id }) }, '✕'));
     } else {
-      meta.push(`⚙️ ${providerLabel(t.provider, store.project)}${model}${usageSuffix(t.provider, w?.usage)}`);
-      meta.push(outcome(t));
-      if (t.workerName) meta.push(t.workerName);
-      if (t.branch) meta.push(`🌿 ${t.branch}`);
-      if (t.finishedAt) meta.push(timeAgo(t.finishedAt));
-      if (t.pr) buttons.push(h('a.btn', { href: t.pr.url, target: '_blank', rel: 'noopener', title: t.pr.title }, `🔀 PR #${t.pr.number}${t.pr.state === 'MERGED' ? ' ✓' : t.pr.state === 'DRAFT' ? ' (draft)' : ''}`));
-      if (w) buttons.push(h('button.btn', { type: 'button', onclick: () => actions.openTerminal(w.id) }, '🖥️ Terminal'));
-      buttons.push(h('button.btn', { type: 'button', title: 'Put it back on the queue', onclick: () => net.send({ t: 'queue.retry', taskId: t.id }) }, '↻ Requeue'));
-      buttons.push(h('button.btn', { type: 'button', title: 'Forget it', 'aria-label': 'Remove', onclick: () => net.send({ t: 'queue.remove', taskId: t.id }) }, '✕'));
+      meta.push(`⚙️ ${providerLabel(task.provider, store.project)}${model}${usageSuffix(task.provider, w?.usage)}`);
+      meta.push(outcome(task));
+      if (task.workerName) meta.push(task.workerName);
+      if (task.branch) meta.push(`🌿 ${task.branch}`);
+      if (task.finishedAt) meta.push(timeAgo(task.finishedAt));
+      if (task.pr) buttons.push(h('a.btn', { href: task.pr.url, target: '_blank', rel: 'noopener', title: task.pr.title }, `🔀 PR #${task.pr.number}${task.pr.state === 'MERGED' ? ' ✓' : task.pr.state === 'DRAFT' ? ' (draft)' : ''}`));
+      if (w) buttons.push(h('button.btn', { type: 'button', onclick: () => actions.openTerminal(w.id) }, t('🖥️ Terminal')));
+      buttons.push(h('button.btn', { type: 'button', title: t('Put it back on the queue'), onclick: () => net.send({ t: 'queue.retry', taskId: task.id }) }, t('↻ Requeue')));
+      buttons.push(h('button.btn', { type: 'button', title: t('Forget it'), 'aria-label': t('Remove'), onclick: () => net.send({ t: 'queue.remove', taskId: task.id }) }, '✕'));
     }
     return h(
       'li',
-      { class: t.status },
+      { class: task.status },
       pos ? h('span.pos', {}, pos) : null,
-      h('div.queue-main', {}, taskTitle(t), h('div.queue-meta', {}, meta.join(' · '))),
+      h('div.queue-main', {}, taskTitle(task), h('div.queue-meta', {}, meta.join(' · '))),
       h('div.queue-actions', {}, ...buttons),
     );
   };

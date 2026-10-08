@@ -3,6 +3,7 @@ import type { Ctx } from '../../core/context';
 import { aside, hintTitle, key, onE } from '../../core/hint';
 import { store } from '../../state';
 import { clip } from '../../ui/dom';
+import { t } from '../../ui/i18n';
 import { mirrorWhiteboard, openWhiteboard } from './ui';
 
 // The kinds of thing you can use that this defines (see InteractKinds in world/types.ts).
@@ -20,7 +21,7 @@ export function installWhiteboard(ctx: Ctx) {
     reach: 7,
     hint: () => {
       const names = store.drawing.flatMap((id) => (id === store.you ? [] : (store.peers.get(id)?.name ?? []))).join(', ');
-      return { k: names, parts: [hintTitle('📝 Whiteboard'), aside(names ? `✏️ ${clip(names, 40)} drawing` : 'draw together, live'), key('E', names ? 'Join in' : 'Draw')] };
+      return { k: names, parts: [hintTitle(t('📝 Whiteboard')), aside(names ? `✏️ ${clip(names, 40)} ${t('drawing')}` : t('draw together, live')), key('E', names ? t('Join in') : t('Draw'))] };
     },
     use: onE(() => openWhiteboard(ctx.net)),
   });

@@ -7,6 +7,7 @@ import type { GongWhy } from '../../../shared/protocol';
 import { isAsleep } from '../../../shared/status';
 import type { Ctx } from '../../core/context';
 import { aside, hintTitle, key, onE } from '../../core/hint';
+import { t } from '../../ui/i18n';
 import { store, workerForPull } from '../../state';
 import type { Stage, Worker } from '../../world/character';
 import type { Area } from '../../world/confetti';
@@ -43,7 +44,7 @@ export function installGong(ctx: Ctx, deps: GongDeps) {
 
   ctx.interactions.define('gong', {
     reach: 3.5,
-    hint: () => ({ k: '', parts: [hintTitle('🎉 Merge gong'), aside('rings when a PR merges'), key('E', 'Bang it')] }),
+    hint: () => ({ k: '', parts: [hintTitle(t('🎉 Merge gong')), aside(t('rings when a PR merges')), key('E', t('Bang it'))] }),
     use: onE(() => hitGong()),
   });
 

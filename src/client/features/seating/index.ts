@@ -8,6 +8,7 @@ import { aside, hintTitle, key, onE } from '../../core/hint';
 import { store } from '../../state';
 import type { Arcade } from '../arcade/ui';
 import { toast } from '../../ui/dom';
+import { t } from '../../ui/i18n';
 import type { Interactable } from '../../world/types';
 
 // The kinds of thing you can use that this defines (see InteractKinds in world/types.ts).
@@ -112,11 +113,11 @@ export function installSeating(ctx: Ctx, deps: SeatingDeps) {
       if (!seat) return { k: '', parts: [] };
       if (ctx.player.seat?.seatId === seat.id) {
         const tv = !!seat.tv && tvShowing();
-        const use = tv ? 'Watch the TV' : seat.game ? 'Play Minesweeper' : seat.bar ? 'Order a drink' : '';
-        return { k: `${seat.id}|sitting|${tv}`, parts: [hintTitle(seat.label), aside('sitting'), ...(use ? [key('E', use), key('W A S D', 'Get up')] : [key('E', 'Get up')])] };
+        const use = tv ? t('Watch the TV') : seat.game ? t('Play Minesweeper') : seat.bar ? t('Order a drink') : '';
+        return { k: `${seat.id}|sitting|${tv}`, parts: [hintTitle(t(seat.label)), aside(t('sitting')), ...(use ? [key('E', use), key('W A S D', t('Get up'))] : [key('E', t('Get up'))])] };
       }
       const full = !freePlace(seat);
-      return { k: `${seat.id}|${full}`, parts: [hintTitle(seat.label), seat.game ? aside('💣 Minesweeper on the monitor') : '', full ? aside('no room') : key('E', 'Sit down')] };
+      return { k: `${seat.id}|${full}`, parts: [hintTitle(t(seat.label)), seat.game ? aside(t('💣 Minesweeper on the monitor')) : '', full ? aside(t('no room')) : key('E', t('Sit down'))] };
     },
     use: onE((it) => {
       if (it.seatId) useSeat(it.seatId);

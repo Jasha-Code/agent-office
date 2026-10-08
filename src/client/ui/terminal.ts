@@ -15,6 +15,7 @@ import { engineLabel, providerUsageNote, providerUsageState, providerWaitingLabe
 import { naturalKey } from './termkeys';
 import { termTabs } from './termtabs';
 import { dictateField, dictation } from './dictate';
+import { t } from './i18n';
 
 /** A line to scroll to once the terminal has loaded: a search hit (see search.ts). */
 export interface TerminalFind {
@@ -125,12 +126,12 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
     title: 'Send Esc to the terminal (Ctrl+[): closes a menu like /skills, or interrupts the agent. The Esc key on its own leaves the terminal',
     'aria-label': 'Send Esc to the terminal',
   }, '⎋ Esc');
-  const changesBtn = h('button.btn', { type: 'button', title: 'What this worker changed: files, diff, commit, open a PR (C at the desk)' }, '🌿 Changes');
-  const closeBtn = h('button.btn.close', { title: 'Leave terminal (Esc or Ctrl+]) · ⎋ Esc or Ctrl+[ sends Esc to the terminal', 'aria-label': 'Close' }, '✕');
+  const changesBtn = h('button.btn', { type: 'button', title: t('What this worker changed: files, diff, commit, open a PR (C at the desk)') }, `🌿 ${t('Changes')}`);
+  const closeBtn = h('button.btn.close', { title: `${t('Leave terminal')} (Esc)`, 'aria-label': t('Close') }, '✕');
   const host = h('div.term-host', { 'data-drop': '📎 Drop screenshots or files here to put them in the terminal' });
   const keys = h('div.term-keys', { role: 'group', 'aria-label': 'Keys' });
-  const say = h('input', { type: 'text', placeholder: 'Reply, or tell it what to do next…', 'aria-label': 'Prompt', enterkeyhint: 'send', autocomplete: 'off' }) as HTMLInputElement;
-  const sayBtn = h('button.btn.primary', { type: 'submit' }, 'Send');
+  const say = h('input', { type: 'text', placeholder: t('Reply, or tell it what to do next…'), 'aria-label': t('Prompt'), enterkeyhint: 'send', autocomplete: 'off' }) as HTMLInputElement;
+  const sayBtn = h('button.btn.primary', { type: 'submit' }, t('Send'));
   const sayForm = h('form.term-say', {}, dictateField(say), sayBtn);
   const keypad = opts.keypad ? h('div.term-keypad', {}, keys, sayForm) : null;
   const tabs = termTabs(workerId, { host, keypad, focusTerm: () => term.focus() });

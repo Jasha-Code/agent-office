@@ -2,6 +2,7 @@ import type { Ctx } from '../../core/context';
 import { aside, hintTitle, key, onE } from '../../core/hint';
 import { noOutline } from '../../core/outline';
 import { store } from '../../state';
+import { t } from '../../ui/i18n';
 import { Dog } from './world';
 
 // The kinds of thing you can use that this defines (see InteractKinds in world/types.ts).
@@ -35,7 +36,7 @@ export function installDog(ctx: Ctx): Dog {
         (id) => store.workers.get(id)?.name,
         (id) => (id === store.you ? 'you' : store.peers.get(id)?.name),
       );
-      return { k: `${dog.name}|${doing}`, parts: [hintTitle(`🐶 ${dog.name}`), doing ? aside(doing) : '', key('E', 'Pet')] };
+      return { k: `${dog.name}|${doing}`, parts: [hintTitle(`🐶 ${dog.name}`), doing ? aside(t(doing)) : '', key('E', t('Pet'))] };
     },
     use: onE(() => ctx.net.send({ t: 'dog.pet' })),
   });

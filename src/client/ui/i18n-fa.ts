@@ -1,6 +1,7 @@
-// Persian (Farsi) translations dictionary for Agent Office.
+import { FA_OFFICE_TRANSLATIONS } from './i18n-fa-office';
 
 export const FA_TRANSLATIONS: Record<string, string> = {
+  ...FA_OFFICE_TRANSLATIONS,
   // App & General
   'Agent Office': 'دفتر کار ایجنت‌ها',
   'Loading the office': 'در حال بارگذاری دفتر کار…',

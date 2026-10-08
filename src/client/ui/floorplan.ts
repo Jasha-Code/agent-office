@@ -4,7 +4,7 @@ import { DESK_BY_ID, WING } from '../../shared/layout';
 import type { Net } from '../net';
 import { store } from '../state';
 import { h, openModal } from './dom';
-import { t } from './i18n';
+import { deskLabel, t } from './i18n';
 
 const COLOR_KEY = 'agent-office.signColor';
 function lastColor(): string {
@@ -21,19 +21,19 @@ export function openDeskLabel(net: Net, deskId: string) {
   if (!desk) return;
   const old = store.floorPlan.labels[deskId];
   let color = old?.color ?? lastColor();
-  const input = h('input', { type: 'text', maxlength: MAX_LABEL, placeholder: 'Operations', 'aria-label': 'Sign', autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
+  const input = h('input', { type: 'text', maxlength: MAX_LABEL, placeholder: t('Operations'), 'aria-label': t('Sign'), autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
   input.value = old?.text ?? '';
   const preview = h('div.sign-preview', { 'aria-hidden': 'true' });
   const swatches = h('div.swatches', { role: 'radiogroup', 'aria-label': t('Color') });
   const ideas = h('div.label-ideas');
-  const submit = h('button.btn.primary', { type: 'submit' }, old ? t('Save') : `🪧 ${t('Hang it')}`) as HTMLButtonElement;
+  const submit = h('button.btn.primary', { type: 'submit' }, old ? t('Save') : t('Hang it')) as HTMLButtonElement;
   const remove = old ? (h('button.btn.danger', { type: 'button' }, t('Take it down')) as HTMLButtonElement) : null;
   const cancel = h('button.btn', { type: 'button' }, t('Cancel'));
   const close = h('button.btn.close', { type: 'button', 'aria-label': t('Close'), title: `${t('Close')} (Esc)` }, '✕');
   const form = h(
     'form.modal.desklabel',
-    { role: 'dialog', 'aria-label': `${t('Sign over')} ${desk.label}` },
-    h('header', {}, h('h2', {}, `🪧 ${t('Sign over')} ${desk.label}`), close),
+    { role: 'dialog', 'aria-label': `${t('Sign over')} ${deskLabel(desk.label)}` },
+    h('header', {}, h('h2', {}, `🪧 ${t('Sign over')} ${deskLabel(desk.label)}`), close),
     h('div.body', {}, preview, h('label', { style: 'margin-top:14px' }, t('What it says')), input, ideas, h('label', { style: 'margin-top:14px' }, t('Color')), swatches),
     h('footer', {}, h('span.grow', {}, t('It hangs from the ceiling over the desk, for everyone on this floor.')), remove, cancel, submit),
   ) as HTMLFormElement;
@@ -43,10 +43,10 @@ export function openDeskLabel(net: Net, deskId: string) {
     const text = cleanLabel(input.value);
     preview.style.background = color;
     preview.style.color = signInk(color);
-    preview.textContent = text || 'Operations';
+    preview.textContent = text || t('Operations');
     preview.classList.toggle('placeholder', !text);
     submit.disabled = !text && !old;
-    submit.textContent = !text && old ? 'Take it down' : old ? 'Save' : '🪧 Hang it';
+    submit.textContent = !text && old ? t('Take it down') : old ? t('Save') : t('Hang it');
     for (const b of swatches.children) (b as HTMLElement).classList.toggle('sel', (b as HTMLElement).dataset.color === color);
   };
   swatches.replaceChildren(
@@ -54,8 +54,8 @@ export function openDeskLabel(net: Net, deskId: string) {
       h('button.swatch', {
         type: 'button',
         role: 'radio',
-        title: c.name,
-        'aria-label': c.name,
+        title: t(c.name),
+        'aria-label': t(c.name),
         'data-color': c.color,
         style: `background:${c.color}`,
         onclick: () => {
@@ -82,7 +82,7 @@ export function openDeskLabel(net: Net, deskId: string) {
             input.focus();
           },
         },
-        idea,
+        t(idea),
       ),
     ),
   );

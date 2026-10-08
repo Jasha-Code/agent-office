@@ -53,6 +53,17 @@ export function t(key: string, fallback?: string): string {
   return fallback ?? key;
 }
 
+/** Translates dynamic desk and station labels like "Desk 1" or "Bean bag 2" to Persian. */
+export function deskLabel(label?: string): string {
+  if (!label) return '';
+  if (activeLang !== 'fa') return label;
+  const deskMatch = /^Desk\s+(\d+)$/i.exec(label);
+  if (deskMatch) return `میز ${deskMatch[1]}`;
+  const beanbagMatch = /^Bean bag\s+(\d+)$/i.exec(label);
+  if (beanbagMatch) return `بین‌بگ ${beanbagMatch[1]}`;
+  return t(label);
+}
+
 /** Applies dir and lang attributes to documentElement. Safe to call in browser environments. */
 export function applyLanguageDom(): void {
   if (typeof document === 'undefined') return;

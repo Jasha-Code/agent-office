@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import type { Ctx } from '../../core/context';
 import { hintTitle, key, onE } from '../../core/hint';
+import { t } from '../../ui/i18n';
 
 // The kinds of thing you can use that this defines (see InteractKinds in world/types.ts).
 declare module '../../world/types' {
@@ -41,12 +42,12 @@ export function installTv(ctx: Ctx, deps: TvDeps) {
     g.fillStyle = '#fff';
     g.textAlign = 'center';
     g.font = '900 88px Nunito, ui-rounded, system-ui, sans-serif';
-    g.fillText('📺 Office TV', 640, 330);
+    g.fillText(t('📺 Office TV'), 640, 330);
     g.font = '700 44px Nunito, ui-rounded, system-ui, sans-serif';
-    g.fillText('Click “Share screen” to put something up here', 640, 420);
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    return t;
+    g.fillText(t('Click “Share screen” to put something up here'), 640, 420);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
   })();
   const tvMat = ctx.office.tvScreen.material as THREE.MeshBasicMaterial;
   tvMat.color.set('#ffffff');
@@ -56,7 +57,7 @@ export function installTv(ctx: Ctx, deps: TvDeps) {
     reach: 10,
     hint: () => {
       const any = deps.shares().length > 0;
-      return { k: String(any), parts: [hintTitle('📺 Office TV'), key('E', any ? 'Watch full screen' : 'Share your screen')] };
+      return { k: String(any), parts: [hintTitle(t('📺 Office TV')), key('E', t(any ? 'Watch full screen' : 'Share your screen'))] };
     },
     use: onE(() => deps.watch()),
   });

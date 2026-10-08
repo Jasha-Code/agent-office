@@ -119,9 +119,9 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
     const on = settings.hud[id];
     return h(
       'button.btn.dock-btn.dock-panel',
-      { type: 'button', 'aria-pressed': String(on), title: `${title}${on ? ' · click to hide' : ' · click to show'}`, onclick: () => setPanel(id, !settings.hud[id]) },
+      { type: 'button', 'aria-pressed': String(on), title: `${title}${on ? ` · ${t('click to hide')}` : ` · ${t('click to show')}`}`, onclick: () => setPanel(id, !settings.hud[id]) },
       icon,
-      h('span.lbl', {}, label),
+      h('span.lbl', {}, t(label)),
       n ? h('span.n', {}, String(n)) : null,
     );
   }
@@ -129,14 +129,14 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
   function render() {
     const items: HTMLElement[] = actions.filter((a) => offered(a) && (pinned(a) || a.status?.())).map(dockButton);
     const people = store.peers.size;
-    if (people > 1 || settings.hud.people) items.push(panelChip('people', '👥', 'People', people, `${people} in the office`));
+    if (people > 1 || settings.hud.people) items.push(panelChip('people', '👥', t('People'), people, `${people} ${t('in the office')}`));
     const workers = [...store.workers.values()];
     // Hired onto desks, bean bags and the meeting room's table; the board agents at their kiosks don't count.
     const hired = workers.filter((w) => !DESK_BY_ID.get(w.deskId)?.station).length;
     const waiting = workers.filter(waitingOnSomeone).length;
-    const workersTitle = hired || waiting ? `${hired} worker${hired === 1 ? '' : 's'} on this floor${waiting ? `, ${waiting} waiting on someone` : ''}` : 'No workers on this floor yet';
+    const workersTitle = hired || waiting ? `${hired} ${t('Workers')} ${t('on this floor')}${waiting ? `، ${waiting} ${t('Waiting on an answer')}` : ''}` : t('No workers on this floor yet');
     // Who's waiting has its own button on the bar (the 'waiting' action), so this just counts them.
-    items.push(panelChip('workers', '🤖', 'Workers', hired, workersTitle));
+    items.push(panelChip('workers', '🤖', t('Workers'), hired, workersTitle));
     // Redrawn only when it looks different, so a busy worker's updates don't swap a button out from under a click.
     const next = h('div', {}, ...items);
     if (next.innerHTML !== [...dock.children].filter((c) => c !== menuBtn).map((c) => c.outerHTML).join('')) dock.replaceChildren(...items, menuBtn);
